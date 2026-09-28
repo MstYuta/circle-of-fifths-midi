@@ -96,4 +96,4 @@ Netlify, Vercel and Cloudflare Pages also work by dropping in the folder.
 
 ## License
 
-MIT – see `LICENSE`. (Add a `LICENSE` file, or change this line to the licence you prefer.)
+MIT – see `LICENSE`.
