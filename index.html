@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Circle of Fifths – MIDI Visualizer</title>
+<meta name="description" content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser.">
+<meta name="theme-color" content="#0e0e12">
+<meta name="color-scheme" content="dark">
+<meta name="keywords" content="circle of fifths, MIDI visualizer, scale degrees, music theory, ear training, piano">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Circle of Fifths – MIDI Visualizer">
+<meta property="og:description" content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Circle of Fifths – MIDI Visualizer">
+<meta name="twitter:description" content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0e12'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23555' stroke-width='2'/%3E%3Ccircle cx='32' cy='12' r='6' fill='%235a5aff'/%3E%3Ccircle cx='49' cy='22' r='6' fill='%23b04dff'/%3E%3Ccircle cx='49' cy='42' r='6' fill='%23ff3fa0'/%3E%3Ccircle cx='32' cy='52' r='6' fill='%23ffe14d'/%3E%3Ccircle cx='15' cy='42' r='6' fill='%234dff7a'/%3E%3Ccircle cx='15' cy='22' r='6' fill='%234dd7ff'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0e12'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23555' stroke-width='2'/%3E%3Ccircle cx='32' cy='12' r='6' fill='%235a5aff'/%3E%3Ccircle cx='49' cy='22' r='6' fill='%23b04dff'/%3E%3Ccircle cx='49' cy='42' r='6' fill='%23ff3fa0'/%3E%3Ccircle cx='32' cy='52' r='6' fill='%23ffe14d'/%3E%3Ccircle cx='15' cy='42' r='6' fill='%234dff7a'/%3E%3Ccircle cx='15' cy='22' r='6' fill='%234dd7ff'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#0e0e12;--panel:#191920;--ring:#34343e;--txt:#c4c4cd;--dim:#8c8c98;--hi:#fff;--acc:#7b7bff}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;color:var(--txt);font-family:"Jost","Futura","Avenir Next",system-ui,sans-serif;
+background:radial-gradient(ellipse at 50% 45%,#1b1b26 0%,#0e0e12 70%) fixed;
+display:flex;flex-direction:column;align-items:center;padding:14px 14px 10px}
+header{width:100%;max-width:900px;display:flex;flex-direction:column;align-items:center;gap:10px}
+h1{margin:0;font-size:22px;font-weight:500;color:var(--hi);letter-spacing:.02em}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:6px;background:var(--panel);border:1px solid var(--ring);border-radius:14px}
+.chips button{font:inherit;font-size:17px;font-weight:500;color:var(--txt);background:transparent;border:0;border-radius:9px;
+min-width:44px;height:40px;padding:0 8px;cursor:pointer;transition:background .15s,color .15s}
+.chips button:hover{background:#26262f}
+.chips button.on{background:var(--hi);color:#111}
+.tools{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:center;font-size:16px}
+.tools label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.tools input{accent-color:var(--acc);width:18px;height:18px}
+#learn{font:inherit;font-size:16px;color:var(--txt);background:var(--panel);border:1px solid var(--ring);border-radius:10px;padding:8px 14px;cursor:pointer}
+#learn.on{border-color:var(--acc);color:var(--hi);box-shadow:0 0 0 3px #7b7bff33}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#status{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--txt);text-align:center;min-height:1.4em}
+#sdot{width:10px;height:10px;border-radius:50%;background:#666;flex:none}
+#sdot.ok{background:#3ddc84;box-shadow:0 0 8px #3ddc84}#sdot.warn{background:#ffb84d}#sdot.bad{background:#ff5c6c}#sdot.wait{background:#7b7bff}
+#help{font-size:14px;color:var(--dim);max-width:620px;text-align:center;line-height:1.45;margin-top:-4px}
+#connect{font:inherit;font-size:15px;color:#111;background:var(--hi);border:0;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:500}
+.piano{position:relative;width:min(96vw,760px);height:112px;margin:2px 0 4px;flex:none;touch-action:none;user-select:none;-webkit-user-select:none}
+.wk,.bk{position:absolute;top:0;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wk{height:100%;background:#e8e8ee;border-radius:0 0 7px 7px;border:1px solid #0e0e12}
+.bk{height:58%;width:7.5%;background:#1c1c24;border:1px solid #444;border-radius:0 0 5px 5px;z-index:2}
+.wk.on{background:#9d9dff}.bk.on{background:#6c6cff}
+.tools select,.tools input[type=range]{font:inherit;font-size:15px}
+.tools select{background:var(--panel);color:var(--txt);border:1px solid var(--ring);border-radius:8px;padding:6px 8px}
+.tools input[type=range]{width:100px;padding:0;height:auto}
+#sndhint{font-size:14px;color:#ffb84d;min-height:1.2em}
+.wk span{position:absolute;bottom:5px;left:0;right:0;font-size:11px;color:#777;pointer-events:none}
+.obar{display:flex;align-items:center;gap:10px;font-size:15px;margin-top:4px}
+.obar button{font:inherit;font-size:14px;color:var(--txt);background:var(--panel);border:1px solid var(--ring);border-radius:8px;padding:6px 12px;cursor:pointer}
+.obar button.alert{border-color:#fff;color:#fff;box-shadow:0 0 10px #ffffff88}
+#octl{color:var(--hi);min-width:92px;text-align:center;font-weight:500}
+.pl{font-size:12px;color:var(--dim);margin-bottom:8px}
+main{flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:0;padding-top:4px}
+svg{width:min(98vw,calc(100vh - 360px),1000px);width:min(98vw,calc(100dvh - 360px),1000px);min-width:300px;height:auto;overflow:visible;touch-action:none;user-select:none;-webkit-user-select:none}
+.deg{font-size:42px;fill:#b9b9c4;font-weight:500;transition:fill .12s}
+.deg.on{fill:#fff;font-weight:600}
+.nm{font-size:23px;fill:#8e8e9c;font-weight:500;transition:fill .12s}
+.nm.on{fill:#fff}
+.glow{opacity:0;transition:opacity .45s ease-out}
+.glow.on{opacity:1;transition:opacity .05s}
+.ring{fill:none;stroke:#fff;stroke-width:4;opacity:0;transition:opacity .1s}
+.ring.on{opacity:1}
+.dot{cursor:pointer}
+.tdot{fill:none;stroke:#ffffff55;stroke-width:1.5}
+.center{text-anchor:middle;fill:#fff;font-weight:500}
+#shape{fill:#ffffff10;stroke:#ffffff70;stroke-width:2;stroke-linejoin:round}
+@media (max-width:520px){h1{font-size:19px}.chips button{min-width:38px;height:36px;font-size:15px}svg{width:100vw}}
+@media (prefers-reduced-motion:reduce){.glow,.deg,.nm{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Circle of Fifths</h1>
+  <div class="chips" id="tonics" role="group" aria-label="Choose tonic"></div>
+  <div class="tools">
+    <button id="learn">Set tonic from next note</button>
+    <label><input type="checkbox" id="names" checked> Note names</label>
+    <label><input type="checkbox" id="kb" checked> Computer keys (A–' row)</label>
+    <label><input type="checkbox" id="snd" checked> Sound</label>
+    <label>Volume <input type="range" id="vol" min="0" max="1" step="0.01" value="0.6" aria-label="Volume"></label>
+    <select id="wave" aria-label="Instrument"><option value="piano">Piano-like</option><option value="soft">Soft pad</option><option value="organ">Organ</option><option value="synth">Synth</option></select>
+  </div>
+  <div id="status" role="status" aria-live="polite"><span id="sdot" class="wait"></span><span id="stext">Connecting to MIDI…</span></div>
+  <div id="help" hidden></div>
+  <div id="sndhint" hidden>Click or press a key on this page once to switch sound on.</div>
+  <button id="connect" hidden>Connect MIDI keyboard</button>
+</header>
+<main>
+<svg id="svg" viewBox="-50 -50 700 700" role="img" aria-label="Circle of fifths by scale degree">
+  <defs id="defs"></defs>
+  <circle cx="300" cy="300" r="250" fill="none" stroke="var(--ring)" stroke-width="2"/>
+  <circle cx="300" cy="300" r="150" fill="none" stroke="#ffffff0d" stroke-width="1.5"/>
+  <circle cx="300" cy="300" r="205" fill="none" stroke="#ffffff08" stroke-width="1.5"/>
+  <path id="shape" d=""/>
+  <g id="g"></g>
+  <text id="c1" class="center" x="300" y="304" font-size="60"></text>
+  <text id="c2" class="center" x="300" y="346" font-size="26" fill="#9a9aa8"></text>
+</svg>
+</main>
+<div class="obar"><button id="octd" title="Lower octave (Z)">◀ Lower (Z)</button><span id="octl"></span><button id="octu" title="Higher octave (X)">Higher (X) ▶</button></div>
+<div class="piano" id="piano" aria-label="On-screen keyboard"></div>
+<div class="pl">Lights up for every note you play. Click the keys to play without a MIDI keyboard.</div>
+<noscript>This visualizer needs JavaScript enabled.</noscript>
+<script>
+const $=id=>document.getElementById(id);
+const N=["C","C♯","D","E♭","E","F","F♯","G","A♭","A","B♭","B"];
+const DEG=["1","♭2","2","♭3","3","4","♯4","5","♭6","6","♭7","7"];
+const NS="http://www.w3.org/2000/svg", CX=300, CY=300, R=250;
+let tonic=0, learn=false;
+const held=new Map();
+const pos=d=>(d*7)%12;
+const col=p=>`hsl(${(245+p*30)%360} 95% 62%)`;
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e};
+
+const tb=document.getElementById("tonics");
+N.forEach((n,i)=>{const b=document.createElement("button");b.textContent=n;b.onclick=()=>setTonic(i);tb.appendChild(b)});
+function setTonic(t){tonic=t;learn=false;const l=document.getElementById("learn");l.textContent="Set tonic from next note";l.classList.remove("on");
+ [...tb.children].forEach((b,i)=>b.classList.toggle("on",i===t));build();render()}
+
+const g=document.getElementById("g"),defs=document.getElementById("defs");
+let nodes={};
+function build(){
+ g.innerHTML="";defs.innerHTML="";nodes={};
+ for(let d=0;d<12;d++){
+  const p=pos(d),a=p*Math.PI/6-Math.PI/2,x=CX+R*Math.cos(a),y=CY+R*Math.sin(a),c=col(p);
+  const gr=el("radialGradient",{id:"gr"+d},defs);
+  el("stop",{offset:"0","stop-color":c,"stop-opacity":".95"},gr);
+  el("stop",{offset:".4","stop-color":c,"stop-opacity":".55"},gr);
+  el("stop",{offset:"1","stop-color":c,"stop-opacity":"0"},gr);
+  const grp=el("g",{class:"dot"},g);
+  const glow=el("circle",{cx:x,cy:y,r:82,fill:`url(#gr${d})`,class:"glow"},grp);
+  el("circle",{cx:x,cy:y,r:30,fill:"transparent"},grp);
+  if(d===0)el("circle",{cx:x,cy:y,r:23,class:"tdot"},grp);
+  el("circle",{cx:x,cy:y,r:15,fill:c},grp);
+  const ring=el("circle",{cx:x,cy:y,r:15,class:"ring"},grp);
+  const t=el("text",{x:CX+(R-54)*Math.cos(a),y:CY+(R-54)*Math.sin(a)+14,"text-anchor":"middle",class:"deg"},g);t.textContent=DEG[d];
+  const nm=el("text",{x:CX+(R-98)*Math.cos(a),y:CY+(R-98)*Math.sin(a)+8,"text-anchor":"middle",class:"nm"},g);
+  nm.textContent=N[(tonic+d)%12];
+  nodes[d]={glow,ring,t,nm,x,y,p};
+  const pc=(tonic+d)%12;
+  grp.addEventListener("pointerdown",e=>{e.preventDefault();noteOn(pc,"ptr"+d,base()+pc)});
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>grp.addEventListener(ev,()=>noteOff(pc,"ptr"+d)));
+ }
+}
+function render(){
+ const names=document.getElementById("names").checked;
+ const act=[];
+ for(let d=0;d<12;d++){
+  const on=(held.get((tonic+d)%12)||0)>0,n=nodes[d];
+  n.glow.classList.toggle("on",on);n.ring.classList.toggle("on",on);n.t.classList.toggle("on",on);n.nm.classList.toggle("on",on);
+  n.nm.style.display=names?"":"none";
+  if(on)act.push(d);
+ }
+ const pts=act.map(d=>nodes[d]).sort((a,b)=>a.p-b.p);
+ document.getElementById("shape").setAttribute("d",pts.length>1?"M"+pts.map(n=>n.x+" "+n.y).join("L")+(pts.length>2?"Z":""):"");
+ updatePiano();
+ act.sort((a,b)=>a-b);
+ document.getElementById("c1").textContent=act.map(d=>DEG[d]).join(" ");
+ document.getElementById("c2").textContent=act.length?(names?act.map(d=>N[(tonic+d)%12]).join(" "):""):"Tonic "+N[tonic];
+}
+const active=new Set(),srcMidi=new Map();
+let oct=3;const base=()=>12*(oct+1);
+function noteOn(pc,src,midi,vel){
+ if(active.has(src))return;
+ if(learn)setTonic(pc%12);
+ const m=midi==null?60+pc:midi;srcMidi.set(src,m);active.add(src);held.set(pc,(held.get(pc)||0)+1);voiceOn(src,m,vel==null?.8:vel);render()}
+function noteOff(pc,src){
+ if(!active.has(src))return;
+ active.delete(src);srcMidi.delete(src);held.set(pc,Math.max(0,(held.get(pc)||1)-1));voiceOff(src);render()}
+
+// ---- sound (Web Audio synth) ----
+let ac=null,master=null;const voices=new Map(),snd={on:true,vol:.6,wave:"piano"};
+const WAVES={
+ piano:{a:.004,d:1.1,s:.1,r:.3,lp:4200,o:[["triangle",1,1],["sine",2,.4],["sine",3,.15]]},
+ soft:{a:.05,d:.3,s:.75,r:.5,lp:2600,o:[["sine",1,1],["sine",2,.2]]},
+ organ:{a:.01,d:.05,s:.9,r:.1,lp:6000,o:[["sine",1,1],["sine",2,.6],["sine",3,.4],["sine",4,.25]]},
+ synth:{a:.01,d:.25,s:.6,r:.25,lp:2400,o:[["sawtooth",1,.6],["square",1.006,.3]]}};
+function initAudio(){
+ if(!ac){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+  try{ac=new C({latencyHint:"interactive"})}catch(e){ac=new C()}
+  const comp=ac.createDynamicsCompressor();master=ac.createGain();master.gain.value=snd.vol*.6;
+  master.connect(comp);comp.connect(ac.destination);ac.onstatechange=hint}
+ if(ac.state==="suspended"&&ac.resume)ac.resume().catch(()=>{});
+ hint();return ac}
+function hint(){$("sndhint").hidden=!(snd.on&&ac&&ac.state!=="running")}
+function voiceOn(src,midi,vel){
+ if(!snd.on)return;const c=initAudio();if(!c)return;voiceOff(src,true);
+ const w=WAVES[snd.wave],t=c.currentTime,f=440*Math.pow(2,(midi-69)/12),g=c.createGain(),lp=c.createBiquadFilter();
+ lp.type="lowpass";lp.frequency.value=Math.min(w.lp,f*8+400);
+ const peak=.4*(.3+.7*vel),sum=w.o.reduce((a,x)=>a+x[2],0);
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+w.a);
+ g.gain.exponentialRampToValueAtTime(Math.max(peak*w.s,.0001),t+w.a+w.d);
+ lp.connect(g);g.connect(master);
+ const oscs=w.o.map(([type,m,lv])=>{const o=c.createOscillator(),og=c.createGain();o.type=type;o.frequency.value=f*m;
+  og.gain.value=lv/sum;o.connect(og);og.connect(lp);o.start(t);return o});
+ voices.set(src,{g,oscs,r:w.r});
+}
+function voiceOff(src,quick){
+ const v=voices.get(src);if(!v||!ac)return;voices.delete(src);
+ const t=ac.currentTime,r=quick?.03:v.r;
+ v.g.gain.cancelScheduledValues(t);v.g.gain.setValueAtTime(Math.max(v.g.gain.value,.0001),t);
+ v.g.gain.exponentialRampToValueAtTime(.0001,t+r);
+ v.oscs.forEach(o=>{try{o.stop(t+r+.05)}catch(e){}});
+ setTimeout(()=>{try{v.g.disconnect()}catch(e){}},(r+.2)*1000);
+}
+function releaseAllVoices(){[...voices.keys()].forEach(k=>voiceOff(k))}
+["pointerdown","keydown","touchstart"].forEach(ev=>addEventListener(ev,()=>{if(snd.on)initAudio()},{passive:true}));
+document.getElementById("learn").onclick=e=>{learn=!learn;e.target.classList.toggle("on",learn);e.target.textContent=learn?"Play a note…":"Set tonic from next note"};
+document.getElementById("names").onchange=render;
+
+const stText=$("stext"),sdot=$("sdot"),help=$("help"),conn=$("connect");
+function setStatus(kind,msg,tip){sdot.className=kind;stText.textContent=msg;help.textContent=tip||"";help.hidden=!tip}
+function wire(acc){
+ const ins=[...acc.inputs.values()];
+ ins.forEach(i=>{i.onmidimessage=m=>{
+  const [st,k,v]=m.data,cmd=st&0xf0,ch=st&0x0f,pre="m"+i.id+"-"+ch+"-";
+  if(cmd===0x90&&v>0)noteOn(k%12,pre+k,k,v/127);
+  else if(cmd===0x80||(cmd===0x90&&v===0))noteOff(k%12,pre+k);
+  else if(cmd===0xB0&&(k===123||k===120)){[...active].forEach(a=>{if(a.startsWith(pre))noteOff(+a.slice(pre.length)%12,a)})}
+ }});
+ if(ins.length){setStatus("ok","Connected: "+ins.map(i=>i.name||"MIDI device").join(", "));conn.hidden=true}
+ else{setStatus("warn","No MIDI keyboard detected.","Plug in and switch on your keyboard, and close other apps that may be using it (a DAW, for example). It will connect automatically, or press Rescan.");conn.textContent="Rescan";conn.hidden=false}
+}
+function precheck(){
+ if(!window.isSecureContext){setStatus("bad","MIDI needs a secure page.","Open this page over https:// – browsers block MIDI on plain http.");conn.hidden=true;return false}
+ if(!navigator.requestMIDIAccess){
+  setStatus("warn","This browser does not support Web MIDI.","Use Chrome, Edge or Opera on desktop, Chrome on Android, or Firefox 108+. Safari and iPhone/iPad browsers do not support Web MIDI. You can still play with the on-screen keys, your computer keyboard, or by clicking the dots.");
+  conn.hidden=true;return false}
+ return true}
+async function connectMIDI(){
+ const embedded=window.top!==window;
+ if(!precheck())return;
+ setStatus("wait","Waiting for MIDI permission…","Choose Allow when your browser asks. Firefox may ask you to install a small site-permission add-on.");
+ conn.hidden=true;
+ try{
+  const acc=await navigator.requestMIDIAccess({sysex:false});
+  acc.onstatechange=()=>wire(acc);wire(acc);
+ }catch(err){
+  const n=err&&err.name;
+  if(n==="SecurityError"||n==="NotAllowedError")
+   setStatus("bad","MIDI permission was blocked.",embedded?"This page is embedded, which can block MIDI. Open it in its own browser tab, then allow MIDI access.":"Click the lock or tune icon in the address bar, set MIDI devices to Allow, then press Connect. (Chrome: Site settings → MIDI devices.)");
+  else if(n==="AbortError"||n==="InvalidStateError")
+   setStatus("warn","The browser could not open MIDI.","Close other apps or tabs using your keyboard, reconnect it, and try again.");
+  else setStatus("bad","Could not start MIDI.","Something went wrong ("+(n||"unknown error")+"). Reload the page, or use the on-screen keys.");
+  conn.textContent="Connect MIDI keyboard";conn.hidden=false;
+ }
+}
+conn.onclick=connectMIDI;
+// No permission prompt on load: the user starts it with the button.
+// (If the browser already remembers "allow", connect quietly.)
+if(precheck()){
+ setStatus("warn","MIDI keyboard not connected","Click Connect MIDI keyboard to allow access.");
+ conn.textContent="Connect MIDI keyboard";conn.hidden=false;
+ try{navigator.permissions.query({name:"midi"}).then(p=>{if(p.state==="granted")connectMIDI()}).catch(()=>{})}catch(e){}
+}
+
+// on-screen piano: two octaves + top C, follows the current octave
+const pianoEl=$("piano");let pkeys=[];
+function buildPiano(){
+ pianoEl.innerHTML="";pkeys=[];
+ const W=[0,2,4,5,7,9,11],B=[[1,0],[3,1],[6,3],[8,4],[10,5]],w=100/15,bw=w*.62,lo=base();
+ const mk=(cls,midi,left,wd)=>{
+  const b=document.createElement("button");b.className=cls;b.setAttribute("aria-label",N[midi%12]+(Math.floor(midi/12)-1));
+  b.style.left=left+"%";b.style.width=wd+"%";
+  if(cls==="wk"&&midi%12===0){const sp=document.createElement("span");sp.textContent="C"+(Math.floor(midi/12)-1);b.appendChild(sp)}
+  pianoEl.appendChild(b);const src="p"+midi;
+  b.addEventListener("pointerdown",e=>{e.preventDefault();b.setPointerCapture&&b.setPointerCapture(e.pointerId);noteOn(midi%12,src,midi)});
+  ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>b.addEventListener(ev,()=>noteOff(midi%12,src)));
+  pkeys.push({b,midi})};
+ for(let o=0;o<2;o++)W.forEach((s,i)=>mk("wk",lo+o*12+s,(o*7+i)*w,w));
+ mk("wk",lo+24,14*w,w);
+ for(let o=0;o<2;o++)B.forEach(([s,i])=>mk("bk",lo+o*12+s,(o*7+i+1)*w-bw/2,bw));
+ $("octl").textContent="C"+oct+" – C"+(oct+2);
+ updatePiano();
+}
+function updatePiano(){
+ const lo=base(),hi=lo+24;let below=false,above=false;const on=new Map();
+ srcMidi.forEach(m=>{if(m<lo)below=true;else if(m>hi)above=true;else on.set(m,1)});
+ pkeys.forEach(({b,midi})=>{
+  if(on.has(midi)){const d=(((midi-tonic)%12)+12)%12;b.classList.add("on");b.style.background=col(pos(d))}
+  else{b.classList.remove("on");b.style.background=""}});
+ $("octd").classList.toggle("alert",below);$("octu").classList.toggle("alert",above);
+}
+function setOct(n){oct=Math.max(0,Math.min(7,n));buildPiano()}
+$("octd").onclick=()=>setOct(oct-1);$("octu").onclick=()=>setOct(oct+1);
+
+// computer keyboard: a w s e d f t g y h u j k o l p ; ' = C..F (1.5 octaves); Z / X change octave
+const KM="awsedftgyhujkolp;'";
+const typing=e=>/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)&&e.target.type!=="checkbox"&&e.target.type!=="range";
+addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||typing(e))return;
+ const k=e.key.toLowerCase();
+ if(k==="z"||k==="x"){if(!e.repeat)setOct(oct+(k==="x"?1:-1));return}
+ if(e.repeat||!$("kb").checked)return;
+ const i=KM.indexOf(k);if(i>=0)noteOn(i%12,"k"+i,base()+i)});
+addEventListener("keyup",e=>{const i=KM.indexOf(e.key.toLowerCase());if(i>=0)noteOff(i%12,"k"+i)});
+addEventListener("blur",()=>{releaseAllVoices();active.clear();srcMidi.clear();held.clear();render()});
+$("snd").onchange=e=>{snd.on=e.target.checked;if(snd.on)initAudio();else releaseAllVoices();hint()};
+$("vol").oninput=e=>{snd.vol=+e.target.value;if(master)master.gain.value=snd.vol*.6};
+$("wave").onchange=e=>{snd.wave=e.target.value};
+initAudio();
+buildPiano();
+setTonic(0);
+</script>
+</body>
+</html>
