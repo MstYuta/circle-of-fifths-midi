@@ -296,9 +296,10 @@ $("octd").onclick=()=>setOct(oct-1);$("octu").onclick=()=>setOct(oct+1);
 
 // computer keyboard: a w s e d f t g y h u j k o l p ; ' = C..F (1.5 octaves); Z / X change octave
 const KM="awsedftgyhujkolp;'";
-const typing=e=>/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)&&e.target.type!=="checkbox"&&e.target.type!=="range";
+const typing=e=>e.target.tagName==="TEXTAREA"||(e.target.tagName==="INPUT"&&!["checkbox","range"].includes(e.target.type));
 addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||typing(e))return;
  const k=e.key.toLowerCase();
+ if(e.target.tagName==="SELECT"&&(k==="z"||k==="x"||KM.includes(k)))e.preventDefault(); // stop the dropdown's type-ahead
  if(k==="z"||k==="x"){if(!e.repeat)setOct(oct+(k==="x"?1:-1));return}
  if(e.repeat||!$("kb").checked)return;
  const i=KM.indexOf(k);if(i>=0)noteOn(i%12,"k"+i,base()+i)});
@@ -306,7 +307,7 @@ addEventListener("keyup",e=>{const i=KM.indexOf(e.key.toLowerCase());if(i>=0)not
 addEventListener("blur",()=>{releaseAllVoices();active.clear();srcMidi.clear();held.clear();render()});
 $("snd").onchange=e=>{snd.on=e.target.checked;if(snd.on)initAudio();else releaseAllVoices();hint()};
 $("vol").oninput=e=>{snd.vol=+e.target.value;if(master)master.gain.value=snd.vol*.6};
-$("wave").onchange=e=>{snd.wave=e.target.value};
+$("wave").onchange=e=>{snd.wave=e.target.value;e.target.blur()};
 initAudio();
 buildPiano();
 setTonic(0);
