@@ -61,11 +61,18 @@ button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .obar button.alert{border-color:#fff;color:#fff;box-shadow:0 0 10px #ffffff88}
 #octl{color:var(--hi);min-width:92px;text-align:center;font-weight:500}
 .pl{font-size:12px;color:var(--dim);margin-bottom:8px}
+.modes button{min-width:76px}
+#dprompt{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;padding:8px 14px;background:var(--panel);border:1px solid var(--acc);border-radius:12px;font-size:15px;color:var(--hi);box-shadow:0 0 0 3px #7b7bff22}
+#dprompt[hidden]{display:none}
+#dprompt button{font:inherit;font-size:14px;color:var(--txt);background:transparent;border:1px solid var(--ring);border-radius:8px;padding:6px 12px;cursor:pointer}
+#dprompt #don{background:var(--hi);color:#111;border-color:var(--hi);font-weight:500}
 main{flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:0;padding-top:4px}
 svg{width:min(98vw,calc(100vh - 360px),1000px);width:min(98vw,calc(100dvh - 360px),1000px);min-width:300px;height:auto;overflow:visible;touch-action:none;user-select:none;-webkit-user-select:none}
 .deg{font-size:42px;fill:#b9b9c4;font-weight:500;transition:fill .12s}
+.deg.out{fill:#7d7d8a}
 .deg.on{fill:#fff;font-weight:600}
 .nm{font-size:23px;fill:#8e8e9c;font-weight:500;transition:fill .12s}
+.nm.out{fill:#757582}
 .nm.on{fill:#fff}
 .glow{opacity:0;transition:opacity .45s ease-out}
 .glow.on{opacity:1;transition:opacity .05s}
@@ -82,14 +89,18 @@ svg{width:min(98vw,calc(100vh - 360px),1000px);width:min(98vw,calc(100dvh - 360p
 <body>
 <header>
   <h1>Circle of Fifths</h1>
+  <div class="chips modes" id="modes" role="group" aria-label="Choose major or minor"><button data-m="major" class="on">Major</button><button data-m="minor">Minor</button></div>
   <div class="chips" id="tonics" role="group" aria-label="Choose tonic"></div>
+  <div id="dprompt" role="group" aria-label="Drone" hidden><span id="dtext"></span><button id="don">Turn drone on</button><button id="dno">Not now</button></div>
   <div class="tools">
     <button id="learn">Set tonic from next note</button>
-    <label><input type="checkbox" id="names" checked> Note names</label>
+    <label><input type="checkbox" id="names"> Note names</label>
     <label><input type="checkbox" id="kb" checked> Computer keys (A–' row)</label>
     <label><input type="checkbox" id="snd" checked> Sound</label>
     <label>Volume <input type="range" id="vol" min="0" max="1" step="0.01" value="0.6" aria-label="Volume"></label>
     <select id="wave" aria-label="Instrument"><option value="piano">Piano-like</option><option value="soft">Soft pad</option><option value="organ">Organ</option><option value="synth">Synth</option></select>
+    <label><input type="checkbox" id="drone"> Drone</label>
+    <label>Drone vol <input type="range" id="dvol" min="0" max="1" step="0.01" value="0.5" aria-label="Drone volume"></label>
   </div>
   <div id="status" role="status" aria-live="polite"><span id="sdot" class="wait"></span><span id="stext">Connecting to MIDI…</span></div>
   <div id="help" hidden></div>
@@ -117,16 +128,35 @@ const $=id=>document.getElementById(id);
 const N=["C","C♯","D","E♭","E","F","F♯","G","A♭","A","B♭","B"];
 const DEG=["1","♭2","2","♭3","3","4","♯4","5","♭6","6","♭7","7"];
 const NS="http://www.w3.org/2000/svg", CX=300, CY=300, R=250;
-let tonic=0, learn=false;
+let tonic=0, learn=false, mode="major", KN=[], SCALE=new Set();
+const IV={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]};
+const KEYS={major:["C","D♭","D","E♭","E","F","F♯","G","A♭","A","B♭","B"],minor:["C","C♯","D","E♭","E","F","F♯","G","G♯","A","B♭","B"]};
+const SHP=["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"],FLT=["C","D♭","D","E♭","E","F","G♭","G","A♭","A","B♭","B"];
+const LET="CDEFGAB",LPC=[0,2,4,5,7,9,11],ACC={"-2":"𝄫","-1":"♭","0":"","1":"♯","2":"𝄪"};
+const keyName=t=>KEYS[mode][t];
+// Note names for each relative position (0..11 semitones above the tonic), spelled for the chosen key:
+// the 7 scale notes use one letter each (e.g. F major has B♭, not A♯); the rest follow the key's sharp/flat side.
+function spell(){
+ const root=keyName(tonic),li=LET.indexOf(root[0]),iv=IV[mode],out=new Array(12).fill(null);
+ iv.forEach((s,i)=>{const L=LET[(li+i)%7],pc=(tonic+s)%12,diff=((pc-LPC[LET.indexOf(L)]+18)%12)-6;out[s]=L+ACC[diff]});
+ const j=out.filter(Boolean).join(""),T=j.includes("♯")?SHP:j.includes("♭")?FLT:N;
+ for(let i=0;i<12;i++)if(out[i]==null)out[i]=T[(tonic+i)%12];
+ KN=out;SCALE=new Set(iv)}
 const held=new Map();
 const pos=d=>(d*7)%12;
 const col=p=>`hsl(${(245+p*30)%360} 95% 62%)`;
 const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e};
 
 const tb=document.getElementById("tonics");
-N.forEach((n,i)=>{const b=document.createElement("button");b.textContent=n;b.onclick=()=>setTonic(i);tb.appendChild(b)});
-function setTonic(t){tonic=t;learn=false;const l=document.getElementById("learn");l.textContent="Set tonic from next note";l.classList.remove("on");
- [...tb.children].forEach((b,i)=>b.classList.toggle("on",i===t));build();render()}
+N.forEach((n,i)=>{const b=document.createElement("button");b.onclick=()=>setTonic(i,true);tb.appendChild(b)});
+function labelChips(){[...tb.children].forEach((b,i)=>b.textContent=KEYS[mode][i])}
+function setTonic(t,user){tonic=t;learn=false;const l=document.getElementById("learn");l.textContent="Set tonic from next note";l.classList.remove("on");
+ [...tb.children].forEach((b,i)=>b.classList.toggle("on",i===t));spell();build();render();
+ if(drone.on)droneStart();else if(user)dronePrompt()}
+function setMode(m){mode=m;[...document.querySelectorAll("#modes button")].forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+ labelChips();spell();build();render();if(!$("dprompt").hidden)$("dtext").textContent=promptText()}
+document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+labelChips();
 
 const g=document.getElementById("g"),defs=document.getElementById("defs");
 let nodes={};
@@ -144,9 +174,9 @@ function build(){
   if(d===0)el("circle",{cx:x,cy:y,r:23,class:"tdot"},grp);
   el("circle",{cx:x,cy:y,r:15,fill:c},grp);
   const ring=el("circle",{cx:x,cy:y,r:15,class:"ring"},grp);
-  const t=el("text",{x:CX+(R-54)*Math.cos(a),y:CY+(R-54)*Math.sin(a)+14,"text-anchor":"middle",class:"deg"},g);t.textContent=DEG[d];
-  const nm=el("text",{x:CX+(R-98)*Math.cos(a),y:CY+(R-98)*Math.sin(a)+8,"text-anchor":"middle",class:"nm"},g);
-  nm.textContent=N[(tonic+d)%12];
+  const t=el("text",{x:CX+(R-54)*Math.cos(a),y:CY+(R-54)*Math.sin(a)+14,"text-anchor":"middle",class:"deg"+(SCALE.has(d)?"":" out")},g);t.textContent=DEG[d];
+  const nm=el("text",{x:CX+(R-98)*Math.cos(a),y:CY+(R-98)*Math.sin(a)+8,"text-anchor":"middle",class:"nm"+(SCALE.has(d)?"":" out")},g);
+  nm.textContent=KN[d];
   nodes[d]={glow,ring,t,nm,x,y,p};
   const pc=(tonic+d)%12;
   grp.addEventListener("pointerdown",e=>{e.preventDefault();noteOn(pc,"ptr"+d,base()+pc)});
@@ -167,13 +197,13 @@ function render(){
  updatePiano();
  act.sort((a,b)=>a-b);
  document.getElementById("c1").textContent=act.map(d=>DEG[d]).join(" ");
- document.getElementById("c2").textContent=act.length?(names?act.map(d=>N[(tonic+d)%12]).join(" "):""):"Tonic "+N[tonic];
+ document.getElementById("c2").textContent=act.length?(names?act.map(d=>KN[d]).join(" "):""):"Tonic "+keyName(tonic)+" "+mode;
 }
 const active=new Set(),srcMidi=new Map();
 let oct=3;const base=()=>12*(oct+1);
 function noteOn(pc,src,midi,vel){
  if(active.has(src))return;
- if(learn)setTonic(pc%12);
+ if(learn)setTonic(pc%12,true);
  const m=midi==null?60+pc:midi;srcMidi.set(src,m);active.add(src);held.set(pc,(held.get(pc)||0)+1);voiceOn(src,m,vel==null?.8:vel);render()}
 function noteOff(pc,src){
  if(!active.has(src))return;
@@ -214,6 +244,34 @@ function voiceOff(src,quick){
  v.oscs.forEach(o=>{try{o.stop(t+r+.05)}catch(e){}});
  setTimeout(()=>{try{v.g.disconnect()}catch(e){}},(r+.2)*1000);
 }
+// ---- drone: sustained tonic for ear training (off by default) ----
+const drone={on:false,vol:.5,v:null};
+function droneStart(){
+ if(!drone.on)return;const c=initAudio();if(!c)return;droneStop(.25);
+ const t=c.currentTime,f=440*Math.pow(2,(36+tonic-69)/12),g=c.createGain(),lp=c.createBiquadFilter();
+ lp.type="lowpass";lp.frequency.value=1000;
+ const parts=[["triangle",1,1],["sine",2,.45],["sine",3,.15]],sum=1.6;
+ g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.45*drone.vol+.0001,t+.25);
+ lp.connect(g);g.connect(master);
+ const oscs=parts.map(([type,m,lv])=>{const o=c.createOscillator(),og=c.createGain();o.type=type;o.frequency.value=f*m;og.gain.value=lv/sum;o.connect(og);og.connect(lp);o.start(t);return o});
+ drone.v={g,oscs}}
+function droneStop(r){
+ const v=drone.v;if(!v||!ac)return;drone.v=null;r=r||.35;
+ const t=ac.currentTime;v.g.gain.cancelScheduledValues(t);v.g.gain.setValueAtTime(Math.max(v.g.gain.value,.0001),t);
+ v.g.gain.linearRampToValueAtTime(.0001,t+r);
+ v.oscs.forEach(o=>{try{o.stop(t+r+.05)}catch(e){}});
+ setTimeout(()=>{try{v.g.disconnect()}catch(e){}},(r+.2)*1000)}
+function setDrone(on){
+ drone.on=on;$("drone").checked=on;
+ if(on){hidePrompt();if(!snd.on){snd.on=true;$("snd").checked=true}droneStart();hint()}else droneStop()}
+let ptimer=0;
+const promptText=()=>"Play a "+keyName(tonic)+" drone to help train your ear?";
+function dronePrompt(){if(drone.on)return;$("dtext").textContent=promptText();$("dprompt").hidden=false;clearTimeout(ptimer);ptimer=setTimeout(hidePrompt,12000)}
+function hidePrompt(){clearTimeout(ptimer);$("dprompt").hidden=true}
+$("drone").onchange=e=>setDrone(e.target.checked);
+$("don").onclick=()=>setDrone(true);
+$("dno").onclick=hidePrompt;
+$("dvol").oninput=e=>{drone.vol=+e.target.value;if(drone.v)drone.v.g.gain.setTargetAtTime(.45*drone.vol+.0001,ac.currentTime,.05)};
 function releaseAllVoices(){[...voices.keys()].forEach(k=>voiceOff(k))}
 ["pointerdown","keydown","touchstart"].forEach(ev=>addEventListener(ev,()=>{if(snd.on)initAudio()},{passive:true}));
 document.getElementById("learn").onclick=e=>{learn=!learn;e.target.classList.toggle("on",learn);e.target.textContent=learn?"Play a note…":"Set tonic from next note"};
@@ -306,7 +364,7 @@ addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||typing(e))retu
  const i=KM.indexOf(k);if(i>=0)noteOn(i%12,"k"+i,base()+i)});
 addEventListener("keyup",e=>{const i=KM.indexOf(e.key.toLowerCase());if(i>=0)noteOff(i%12,"k"+i)});
 addEventListener("blur",()=>{releaseAllVoices();active.clear();srcMidi.clear();held.clear();render()});
-$("snd").onchange=e=>{snd.on=e.target.checked;if(snd.on)initAudio();else releaseAllVoices();hint()};
+$("snd").onchange=e=>{snd.on=e.target.checked;if(snd.on)initAudio();else{releaseAllVoices();setDrone(false)}hint()};
 $("vol").oninput=e=>{snd.vol=+e.target.value;if(master)master.gain.value=snd.vol*.6};
 $("wave").onchange=e=>{snd.wave=e.target.value;e.target.blur()};
 initAudio();
