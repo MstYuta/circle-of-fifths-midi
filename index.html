@@ -403,7 +403,11 @@
           transform 0.7s var(--spring),
           opacity 0.3s var(--ease),
           visibility 0s 0.7s;
-        scrollbar-width: thin;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .menu::-webkit-scrollbar {
+        display: none;
       }
       .dropdown.r .menu {
         left: auto;
