@@ -1,375 +1,2410 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Circle of Fifths – MIDI Visualizer</title>
-<meta name="google-site-verification" content="Z9lODlA9cmloz7dLaNQFME2Czpenpq5EnQZGUF0PPe8" />
-<meta name="description" content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser.">
-<meta name="theme-color" content="#0e0e12">
-<meta name="color-scheme" content="dark">
-<meta name="keywords" content="circle of fifths, MIDI visualizer, scale degrees, music theory, ear training, piano">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Circle of Fifths – MIDI Visualizer">
-<meta property="og:description" content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser.">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Circle of Fifths – MIDI Visualizer">
-<meta name="twitter:description" content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0e12'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23555' stroke-width='2'/%3E%3Ccircle cx='32' cy='12' r='6' fill='%235a5aff'/%3E%3Ccircle cx='49' cy='22' r='6' fill='%23b04dff'/%3E%3Ccircle cx='49' cy='42' r='6' fill='%23ff3fa0'/%3E%3Ccircle cx='32' cy='52' r='6' fill='%23ffe14d'/%3E%3Ccircle cx='15' cy='42' r='6' fill='%234dff7a'/%3E%3Ccircle cx='15' cy='22' r='6' fill='%234dd7ff'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0e12'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23555' stroke-width='2'/%3E%3Ccircle cx='32' cy='12' r='6' fill='%235a5aff'/%3E%3Ccircle cx='49' cy='22' r='6' fill='%23b04dff'/%3E%3Ccircle cx='49' cy='42' r='6' fill='%23ff3fa0'/%3E%3Ccircle cx='32' cy='52' r='6' fill='%23ffe14d'/%3E%3Ccircle cx='15' cy='42' r='6' fill='%234dff7a'/%3E%3Ccircle cx='15' cy='22' r='6' fill='%234dd7ff'/%3E%3C/svg%3E">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Circle of Fifths – MIDI Visualizer</title>
+    <meta
+      name="google-site-verification"
+      content="Z9lODlA9cmloz7dLaNQFME2Czpenpq5EnQZGUF0PPe8"
+    />
+    <meta
+      name="description"
+      content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser."
+    />
+    <meta name="theme-color" content="#0b0820" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="keywords"
+      content="circle of fifths, MIDI visualizer, scale degrees, music theory, ear training, piano"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Circle of Fifths – MIDI Visualizer" />
+    <meta
+      property="og:description"
+      content="Play your MIDI keyboard and watch every note light up on the circle of fifths, shown as scale degrees relative to the tonic you choose. Free, runs in your browser."
+    />
+    <meta name="twitter:card" content="summary" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0820'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23555' stroke-width='2'/%3E%3Ccircle cx='32' cy='12' r='6' fill='%23ffb040'/%3E%3Ccircle cx='49' cy='22' r='6' fill='%23ff5a7a'/%3E%3Ccircle cx='49' cy='42' r='6' fill='%23d04dff'/%3E%3Ccircle cx='32' cy='52' r='6' fill='%235a7aff'/%3E%3Ccircle cx='15' cy='42' r='6' fill='%234dffc0'/%3E%3Ccircle cx='15' cy='22' r='6' fill='%23d7ff4d'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS Properties registered for smooth, gradual color interpolation */
+      @property --c-side1 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #25120a;
+      }
+      @property --c-side2 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #0b1426;
+      }
+      @property --c-side1-subtle {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #180b06;
+      }
+      @property --c-side2-subtle {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #080d1a;
+      }
+      @property --c-mid {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #090814;
+      }
+      @property --b1 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: rgba(255, 120, 40, 0.28);
+      }
+      @property --b2 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: rgba(255, 160, 60, 0.2);
+      }
+      @property --b3 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: rgba(43, 102, 255, 0.28);
+      }
+      @property --b4 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: rgba(80, 140, 255, 0.2);
+      }
+      @property --acc {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #ffa066;
+      }
+      @property --acc2 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: #7099ff;
+      }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
---bg:#0e0e12;--panel:#191920;--ring:#34343e;--txt:#c4c4cd;--dim:#8c8c98;--hi:#fff;--acc:#7b7bff}
-html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
-*{box-sizing:border-box}
-body{margin:0;min-height:100%;color:var(--txt);font-family:"Jost","Futura","Avenir Next",system-ui,sans-serif;
-background:radial-gradient(ellipse at 50% 45%,#1b1b26 0%,#0e0e12 70%) fixed;
-display:flex;flex-direction:column;align-items:center;padding:14px 14px 10px}
-header{width:100%;max-width:900px;display:flex;flex-direction:column;align-items:center;gap:10px}
-h1{margin:0;font-size:22px;font-weight:500;color:var(--hi);letter-spacing:.02em}
-.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:6px;background:var(--panel);border:1px solid var(--ring);border-radius:14px}
-.chips button{font:inherit;font-size:17px;font-weight:500;color:var(--txt);background:transparent;border:0;border-radius:9px;
-min-width:44px;height:40px;padding:0 8px;cursor:pointer;transition:background .15s,color .15s}
-.chips button:hover{background:#26262f}
-.chips button.on{background:var(--hi);color:#111}
-.tools{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:center;font-size:16px}
-.tools label{display:flex;gap:8px;align-items:center;cursor:pointer}
-.tools input{accent-color:var(--acc);width:18px;height:18px}
-#learn{font:inherit;font-size:16px;color:var(--txt);background:var(--panel);border:1px solid var(--ring);border-radius:10px;padding:8px 14px;cursor:pointer}
-#learn.on{border-color:var(--acc);color:var(--hi);box-shadow:0 0 0 3px #7b7bff33}
-button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-#status{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--txt);text-align:center;min-height:1.4em}
-#sdot{width:10px;height:10px;border-radius:50%;background:#666;flex:none}
-#sdot.ok{background:#3ddc84;box-shadow:0 0 8px #3ddc84}#sdot.warn{background:#ffb84d}#sdot.bad{background:#ff5c6c}#sdot.wait{background:#7b7bff}
-#help{font-size:14px;color:var(--dim);max-width:620px;text-align:center;line-height:1.45;margin-top:-4px}
-#connect{font:inherit;font-size:15px;color:#111;background:var(--hi);border:0;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:500}
-.piano{position:relative;width:min(96vw,760px);height:112px;margin:2px 0 4px;flex:none;touch-action:none;user-select:none;-webkit-user-select:none}
-.wk,.bk{position:absolute;top:0;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.wk{height:100%;background:#e8e8ee;border-radius:0 0 7px 7px;border:1px solid #0e0e12}
-.bk{height:58%;width:7.5%;background:#1c1c24;border:1px solid #444;border-radius:0 0 5px 5px;z-index:2}
-.wk.on{background:#9d9dff}.bk.on{background:#6c6cff}
-.tools select,.tools input[type=range]{font:inherit;font-size:15px}
-.tools select{background:var(--panel);color:var(--txt);border:1px solid var(--ring);border-radius:8px;padding:6px 8px}
-.tools input[type=range]{width:100px;padding:0;height:auto}
-#sndhint{font-size:14px;color:#ffb84d;min-height:1.2em}
-.wk span{position:absolute;bottom:5px;left:0;right:0;font-size:11px;color:#777;pointer-events:none}
-.obar{display:flex;align-items:center;gap:10px;font-size:15px;margin-top:4px}
-.obar button{font:inherit;font-size:14px;color:var(--txt);background:var(--panel);border:1px solid var(--ring);border-radius:8px;padding:6px 12px;cursor:pointer}
-.obar button.alert{border-color:#fff;color:#fff;box-shadow:0 0 10px #ffffff88}
-#octl{color:var(--hi);min-width:92px;text-align:center;font-weight:500}
-.pl{font-size:12px;color:var(--dim);margin-bottom:8px}
-.modes button{min-width:76px}
-#dprompt{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;padding:8px 14px;background:var(--panel);border:1px solid var(--acc);border-radius:12px;font-size:15px;color:var(--hi);box-shadow:0 0 0 3px #7b7bff22}
-#dprompt[hidden]{display:none}
-#dprompt button{font:inherit;font-size:14px;color:var(--txt);background:transparent;border:1px solid var(--ring);border-radius:8px;padding:6px 12px;cursor:pointer}
-#dprompt #don{background:var(--hi);color:#111;border-color:var(--hi);font-weight:500}
-main{flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:0;padding-top:4px}
-svg{width:min(98vw,calc(100vh - 360px),1000px);width:min(98vw,calc(100dvh - 360px),1000px);min-width:300px;height:auto;overflow:visible;touch-action:none;user-select:none;-webkit-user-select:none}
-.deg{font-size:42px;fill:#b9b9c4;font-weight:500;transition:fill .12s}
-.deg.out{fill:#7d7d8a}
-.deg.on{fill:#fff;font-weight:600}
-.nm{font-size:23px;fill:#8e8e9c;font-weight:500;transition:fill .12s}
-.nm.out{fill:#757582}
-.nm.on{fill:#fff}
-.glow{opacity:0;transition:opacity .45s ease-out}
-.glow.on{opacity:1;transition:opacity .05s}
-.ring{fill:none;stroke:#fff;stroke-width:4;opacity:0;transition:opacity .1s}
-.ring.on{opacity:1}
-.dot{cursor:pointer}
-.tdot{fill:none;stroke:#ffffff55;stroke-width:1.5}
-.center{text-anchor:middle;fill:#fff;font-weight:500}
-#shape{fill:#ffffff10;stroke:#ffffff70;stroke-width:2;stroke-linejoin:round}
-@media (max-width:520px){h1{font-size:19px}.chips button{min-width:38px;height:36px;font-size:15px}svg{width:100vw}}
-@media (prefers-reduced-motion:reduce){.glow,.deg,.nm{transition:none}}
-</style>
-</head>
-<body>
-<header>
-  <h1>Circle of Fifths</h1>
-  <div class="chips modes" id="modes" role="group" aria-label="Choose major or minor"><button data-m="major" class="on">Major</button><button data-m="minor">Minor</button></div>
-  <div class="chips" id="tonics" role="group" aria-label="Choose tonic"></div>
-  <div id="dprompt" role="group" aria-label="Drone" hidden><span id="dtext"></span><button id="don">Turn drone on</button><button id="dno">Not now</button></div>
-  <div class="tools">
-    <button id="learn">Set tonic from next note</button>
-    <label><input type="checkbox" id="names"> Note names</label>
-    <label><input type="checkbox" id="kb" checked> Computer keys (A–' row)</label>
-    <label><input type="checkbox" id="snd" checked> Sound</label>
-    <label>Volume <input type="range" id="vol" min="0" max="1" step="0.01" value="0.6" aria-label="Volume"></label>
-    <select id="wave" aria-label="Instrument"><option value="piano">Piano-like</option><option value="soft">Soft pad</option><option value="organ">Organ</option><option value="synth">Synth</option></select>
-    <label><input type="checkbox" id="drone"> Drone</label>
-    <label>Drone vol <input type="range" id="dvol" min="0" max="1" step="0.01" value="0.5" aria-label="Drone volume"></label>
-  </div>
-  <div id="status" role="status" aria-live="polite"><span id="sdot" class="wait"></span><span id="stext">Connecting to MIDI…</span></div>
-  <div id="help" hidden></div>
-  <div id="sndhint" hidden>Click or press a key on this page once to switch sound on.</div>
-  <button id="connect" hidden>Connect MIDI keyboard</button>
-</header>
-<main>
-<svg id="svg" viewBox="-50 -50 700 700" role="img" aria-label="Circle of fifths by scale degree">
-  <defs id="defs"></defs>
-  <circle cx="300" cy="300" r="250" fill="none" stroke="var(--ring)" stroke-width="2"/>
-  <circle cx="300" cy="300" r="150" fill="none" stroke="#ffffff0d" stroke-width="1.5"/>
-  <circle cx="300" cy="300" r="205" fill="none" stroke="#ffffff08" stroke-width="1.5"/>
-  <path id="shape" d=""/>
-  <g id="g"></g>
-  <text id="c1" class="center" x="300" y="304" font-size="60"></text>
-  <text id="c2" class="center" x="300" y="346" font-size="26" fill="#9a9aa8"></text>
-</svg>
-</main>
-<div class="obar"><button id="octd" title="Lower octave (Z)">◀ Lower (Z)</button><span id="octl"></span><button id="octu" title="Higher octave (X)">Higher (X) ▶</button></div>
-<div class="piano" id="piano" aria-label="On-screen keyboard"></div>
-<div class="pl">Lights up for every note you play. Click the keys to play without a MIDI keyboard.</div>
-<noscript>This visualizer needs JavaScript enabled.</noscript>
-<script>
-const $=id=>document.getElementById(id);
-const N=["C","C♯","D","E♭","E","F","F♯","G","A♭","A","B♭","B"];
-const DEG=["1","♭2","2","♭3","3","4","♯4","5","♭6","6","♭7","7"];
-const NS="http://www.w3.org/2000/svg", CX=300, CY=300, R=250;
-let tonic=0, learn=false, mode="major", KN=[], SCALE=new Set();
-const IV={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]};
-const KEYS={major:["C","D♭","D","E♭","E","F","F♯","G","A♭","A","B♭","B"],minor:["C","C♯","D","E♭","E","F","F♯","G","G♯","A","B♭","B"]};
-const SHP=["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"],FLT=["C","D♭","D","E♭","E","F","G♭","G","A♭","A","B♭","B"];
-const LET="CDEFGAB",LPC=[0,2,4,5,7,9,11],ACC={"-2":"𝄫","-1":"♭","0":"","1":"♯","2":"𝄪"};
-const keyName=t=>KEYS[mode][t];
-// Note names for each relative position (0..11 semitones above the tonic), spelled for the chosen key:
-// the 7 scale notes use one letter each (e.g. F major has B♭, not A♯); the rest follow the key's sharp/flat side.
-function spell(){
- const root=keyName(tonic),li=LET.indexOf(root[0]),iv=IV[mode],out=new Array(12).fill(null);
- iv.forEach((s,i)=>{const L=LET[(li+i)%7],pc=(tonic+s)%12,diff=((pc-LPC[LET.indexOf(L)]+18)%12)-6;out[s]=L+ACC[diff]});
- const j=out.filter(Boolean).join(""),T=j.includes("♯")?SHP:j.includes("♭")?FLT:N;
- for(let i=0;i<12;i++)if(out[i]==null)out[i]=T[(tonic+i)%12];
- KN=out;SCALE=new Set(iv)}
-const held=new Map();
-const pos=d=>(d*7)%12;
-const col=p=>`hsl(${(245+p*30)%360} 95% 62%)`;
-const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e};
+      :root {
+        --acc: #b9a6ff;
+        --acc2: #e6a6d0;
+        color-scheme: dark;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        --txt: rgba(255, 255, 255, 0.86);
+        --dim: rgba(255, 255, 255, 0.52);
+        --glass: rgba(255, 255, 255, 0.06);
+        --line: rgba(255, 255, 255, 0.14);
+        --ease: cubic-bezier(0.32, 0.72, 0, 1);
+        --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+        height: 100%;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--txt);
+        background: #090812;
+        overflow-x: hidden;
+        /* Slow, silky, and unhurried transition for complete eye comfort */
+        transition:
+          --c-side1 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --c-side2 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --c-side1-subtle 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --c-side2-subtle 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --c-mid 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --b1 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --b2 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --b3 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --b4 3.2s cubic-bezier(0.4, 0, 0.2, 1),
+          --acc 2.4s cubic-bezier(0.4, 0, 0.2, 1),
+          --acc2 2.4s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family:
+          "SF Pro Display",
+          -apple-system,
+          "Inter",
+          system-ui,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      button,
+      select,
+      input {
+        font: inherit;
+        color: inherit;
+      }
+      button:focus-visible,
+      select:focus-visible,
+      input:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 3px;
+      }
 
-const tb=document.getElementById("tonics");
-N.forEach((n,i)=>{const b=document.createElement("button");b.onclick=()=>setTonic(i,true);tb.appendChild(b)});
-function labelChips(){[...tb.children].forEach((b,i)=>b.textContent=KEYS[mode][i])}
-function setTonic(t,user){tonic=t;learn=false;const l=document.getElementById("learn");l.textContent="Set tonic from next note";l.classList.remove("on");
- [...tb.children].forEach((b,i)=>b.classList.toggle("on",i===t));spell();build();render();
- if(drone.on)droneStart();else if(user)dronePrompt()}
-function setMode(m){mode=m;[...document.querySelectorAll("#modes button")].forEach(b=>b.classList.toggle("on",b.dataset.m===m));
- labelChips();spell();build();render();if(!$("dprompt").hidden)$("dtext").textContent=promptText()}
-document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>setMode(b.dataset.m));
-labelChips();
+      /* ---- living background: subtle dual-tone rotating canvas ---- */
+      .bg {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        background: #080711;
+      }
+      /* Oversized plane that rotates gently without showing borders or edges */
+      .bg-rotator {
+        position: absolute;
+        inset: -50%;
+        background:
+          radial-gradient(
+            ellipse 58% 52% at 26% 26%,
+            var(--b1),
+            transparent 74%
+          ),
+          radial-gradient(
+            ellipse 58% 52% at 74% 74%,
+            var(--b3),
+            transparent 74%
+          ),
+          linear-gradient(
+            135deg,
+            var(--c-side1) 0%,
+            var(--c-side1-subtle) 38%,
+            var(--c-mid) 50%,
+            var(--c-side2-subtle) 62%,
+            var(--c-side2) 100%
+          );
+        /* Subtle, serene 3.8s background rotation */
+        transition: transform 3.8s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+        transform: rotate(0deg);
+      }
+      /* Stationary dark ambient vignette that stabilizes contrast */
+      .bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 50% 50%,
+          rgba(8, 7, 17, 0.12) 0%,
+          rgba(8, 7, 17, 0.58) 64%,
+          rgba(8, 7, 17, 0.9) 100%
+        );
+        pointer-events: none;
+      }
+      .tone {
+        position: absolute;
+        inset: 0;
+        opacity: 0.55;
+        filter: blur(105px);
+        pointer-events: none;
+      }
+      .tone i {
+        position: absolute;
+        width: 58vw;
+        height: 62vh;
+        border-radius: 50%;
+        animation: drift 42s ease-in-out infinite alternate;
+        will-change: transform;
+      }
+      .tone i:nth-child(1) {
+        left: -4%;
+        top: -4%;
+        background: radial-gradient(closest-side, var(--b1), transparent);
+      }
+      .tone i:nth-child(2) {
+        left: 2%;
+        bottom: -8%;
+        background: radial-gradient(closest-side, var(--b2), transparent);
+        animation-duration: 50s;
+        animation-delay: -12s;
+      }
+      .tone i:nth-child(3) {
+        right: -4%;
+        top: 2%;
+        background: radial-gradient(closest-side, var(--b3), transparent);
+        animation-duration: 46s;
+        animation-delay: -6s;
+      }
+      .tone i:nth-child(4) {
+        right: 2%;
+        bottom: -6%;
+        background: radial-gradient(closest-side, var(--b4), transparent);
+        animation-duration: 54s;
+        animation-delay: -20s;
+      }
+      @keyframes drift {
+        from {
+          transform: translate3d(-2vw, -1.5vh, 0);
+        }
+        to {
+          transform: translate3d(2.5vw, 2vh, 0);
+        }
+      }
 
-const g=document.getElementById("g"),defs=document.getElementById("defs");
-let nodes={};
-function build(){
- g.innerHTML="";defs.innerHTML="";nodes={};
- for(let d=0;d<12;d++){
-  const p=pos(d),a=p*Math.PI/6-Math.PI/2,x=CX+R*Math.cos(a),y=CY+R*Math.sin(a),c=col(p);
-  const gr=el("radialGradient",{id:"gr"+d},defs);
-  el("stop",{offset:"0","stop-color":c,"stop-opacity":".95"},gr);
-  el("stop",{offset:".4","stop-color":c,"stop-opacity":".55"},gr);
-  el("stop",{offset:"1","stop-color":c,"stop-opacity":"0"},gr);
-  const grp=el("g",{class:"dot"},g);
-  const glow=el("circle",{cx:x,cy:y,r:82,fill:`url(#gr${d})`,class:"glow"},grp);
-  el("circle",{cx:x,cy:y,r:30,fill:"transparent"},grp);
-  if(d===0)el("circle",{cx:x,cy:y,r:23,class:"tdot"},grp);
-  el("circle",{cx:x,cy:y,r:15,fill:c},grp);
-  const ring=el("circle",{cx:x,cy:y,r:15,class:"ring"},grp);
-  const t=el("text",{x:CX+(R-54)*Math.cos(a),y:CY+(R-54)*Math.sin(a)+14,"text-anchor":"middle",class:"deg"+(SCALE.has(d)?"":" out")},g);t.textContent=DEG[d];
-  const nm=el("text",{x:CX+(R-98)*Math.cos(a),y:CY+(R-98)*Math.sin(a)+8,"text-anchor":"middle",class:"nm"+(SCALE.has(d)?"":" out")},g);
-  nm.textContent=KN[d];
-  nodes[d]={glow,ring,t,nm,x,y,p};
-  const pc=(tonic+d)%12;
-  grp.addEventListener("pointerdown",e=>{e.preventDefault();noteOn(pc,"ptr"+d,base()+pc)});
-  ["pointerup","pointerleave","pointercancel"].forEach(ev=>grp.addEventListener(ev,()=>noteOff(pc,"ptr"+d)));
- }
-}
-function render(){
- const names=document.getElementById("names").checked;
- const act=[];
- for(let d=0;d<12;d++){
-  const on=(held.get((tonic+d)%12)||0)>0,n=nodes[d];
-  n.glow.classList.toggle("on",on);n.ring.classList.toggle("on",on);n.t.classList.toggle("on",on);n.nm.classList.toggle("on",on);
-  n.nm.style.display=names?"":"none";
-  if(on)act.push(d);
- }
- const pts=act.map(d=>nodes[d]).sort((a,b)=>a.p-b.p);
- document.getElementById("shape").setAttribute("d",pts.length>1?"M"+pts.map(n=>n.x+" "+n.y).join("L")+(pts.length>2?"Z":""):"");
- updatePiano();
- act.sort((a,b)=>a-b);
- document.getElementById("c1").textContent=act.map(d=>DEG[d]).join(" ");
- document.getElementById("c2").textContent=act.length?(names?act.map(d=>KN[d]).join(" "):""):"Tonic "+keyName(tonic)+" "+mode;
-}
-const active=new Set(),srcMidi=new Map();
-let oct=3;const base=()=>12*(oct+1);
-function noteOn(pc,src,midi,vel){
- if(active.has(src))return;
- if(learn)setTonic(pc%12,true);
- const m=midi==null?60+pc:midi;srcMidi.set(src,m);active.add(src);held.set(pc,(held.get(pc)||0)+1);voiceOn(src,m,vel==null?.8:vel);render()}
-function noteOff(pc,src){
- if(!active.has(src))return;
- active.delete(src);srcMidi.delete(src);held.set(pc,Math.max(0,(held.get(pc)||1)-1));voiceOff(src);render()}
+      /* ---- layout ---- */
+      .app {
+        min-height: 100dvh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 12px;
+        padding: 20px clamp(16px, 3.4vw, 56px) 14px;
+        max-width: 1500px;
+        margin: 0 auto;
+      }
+      .app > * {
+        animation: in 1.1s var(--ease) both;
+        animation-delay: var(--d, 0s);
+      }
+      @keyframes in {
+        from {
+          opacity: 0;
+          filter: blur(10px);
+          transform: translateY(8px);
+        }
+      }
+      .top {
+        position: relative;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        --d: 0.05s;
+      }
+      .stage {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        gap: clamp(16px, 3vw, 56px);
+        align-items: center;
+        --d: 0.2s;
+      }
+      .side {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(14px, 2.4vh, 28px);
+        min-width: 0;
+      }
+      .wheel {
+        width: min(100%, calc(100dvh - 150px), 680px);
+        margin: 0 auto;
+      }
+      .foot {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        color: var(--dim);
+        text-align: center;
+        --d: 0.5s;
+      }
 
-// ---- sound (Web Audio synth) ----
-let ac=null,master=null;const voices=new Map(),snd={on:true,vol:.6,wave:"piano"};
-const WAVES={
- piano:{a:.004,d:1.1,s:.1,r:.3,lp:4200,o:[["triangle",1,1],["sine",2,.4],["sine",3,.15]]},
- soft:{a:.05,d:.3,s:.75,r:.5,lp:2600,o:[["sine",1,1],["sine",2,.2]]},
- organ:{a:.01,d:.05,s:.9,r:.1,lp:6000,o:[["sine",1,1],["sine",2,.6],["sine",3,.4],["sine",4,.25]]},
- synth:{a:.01,d:.25,s:.6,r:.25,lp:2400,o:[["sawtooth",1,.6],["square",1.006,.3]]}};
-function initAudio(){
- if(!ac){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
-  try{ac=new C({latencyHint:"interactive"})}catch(e){ac=new C()}
-  const comp=ac.createDynamicsCompressor();master=ac.createGain();master.gain.value=snd.vol*.6;
-  master.connect(comp);comp.connect(ac.destination);ac.onstatechange=hint}
- if(ac.state==="suspended"&&ac.resume)ac.resume().catch(()=>{});
- hint();return ac}
-function hint(){$("sndhint").hidden=!(snd.on&&ac&&ac.state!=="running")}
-function voiceOn(src,midi,vel){
- if(!snd.on)return;const c=initAudio();if(!c)return;voiceOff(src,true);
- const w=WAVES[snd.wave],t=c.currentTime,f=440*Math.pow(2,(midi-69)/12),g=c.createGain(),lp=c.createBiquadFilter();
- lp.type="lowpass";lp.frequency.value=Math.min(w.lp,f*8+400);
- const peak=.4*(.3+.7*vel),sum=w.o.reduce((a,x)=>a+x[2],0);
- g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+w.a);
- g.gain.exponentialRampToValueAtTime(Math.max(peak*w.s,.0001),t+w.a+w.d);
- lp.connect(g);g.connect(master);
- const oscs=w.o.map(([type,m,lv])=>{const o=c.createOscillator(),og=c.createGain();o.type=type;o.frequency.value=f*m;
-  og.gain.value=lv/sum;o.connect(og);og.connect(lp);o.start(t);return o});
- voices.set(src,{g,oscs,r:w.r});
-}
-function voiceOff(src,quick){
- const v=voices.get(src);if(!v||!ac)return;voices.delete(src);
- const t=ac.currentTime,r=quick?.03:v.r;
- v.g.gain.cancelScheduledValues(t);v.g.gain.setValueAtTime(Math.max(v.g.gain.value,.0001),t);
- v.g.gain.exponentialRampToValueAtTime(.0001,t+r);
- v.oscs.forEach(o=>{try{o.stop(t+r+.05)}catch(e){}});
- setTimeout(()=>{try{v.g.disconnect()}catch(e){}},(r+.2)*1000);
-}
-// ---- drone: sustained tonic for ear training (off by default) ----
-const drone={on:false,vol:.5,v:null};
-function droneStart(){
- if(!drone.on)return;const c=initAudio();if(!c)return;droneStop(.25);
- const t=c.currentTime,f=440*Math.pow(2,(36+tonic-69)/12),g=c.createGain(),lp=c.createBiquadFilter();
- lp.type="lowpass";lp.frequency.value=1000;
- const parts=[["triangle",1,1],["sine",2,.45],["sine",3,.15]],sum=1.6;
- g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.45*drone.vol+.0001,t+.25);
- lp.connect(g);g.connect(master);
- const oscs=parts.map(([type,m,lv])=>{const o=c.createOscillator(),og=c.createGain();o.type=type;o.frequency.value=f*m;og.gain.value=lv/sum;o.connect(og);og.connect(lp);o.start(t);return o});
- drone.v={g,oscs}}
-function droneStop(r){
- const v=drone.v;if(!v||!ac)return;drone.v=null;r=r||.35;
- const t=ac.currentTime;v.g.gain.cancelScheduledValues(t);v.g.gain.setValueAtTime(Math.max(v.g.gain.value,.0001),t);
- v.g.gain.linearRampToValueAtTime(.0001,t+r);
- v.oscs.forEach(o=>{try{o.stop(t+r+.05)}catch(e){}});
- setTimeout(()=>{try{v.g.disconnect()}catch(e){}},(r+.2)*1000)}
-function setDrone(on){
- drone.on=on;$("drone").checked=on;
- if(on){hidePrompt();if(!snd.on){snd.on=true;$("snd").checked=true}droneStart();hint()}else droneStop()}
-let ptimer=0;
-const promptText=()=>"Play a "+keyName(tonic)+" drone to help train your ear?";
-function dronePrompt(){if(drone.on)return;$("dtext").textContent=promptText();$("dprompt").hidden=false;clearTimeout(ptimer);ptimer=setTimeout(hidePrompt,12000)}
-function hidePrompt(){clearTimeout(ptimer);$("dprompt").hidden=true}
-$("drone").onchange=e=>setDrone(e.target.checked);
-$("don").onclick=()=>setDrone(true);
-$("dno").onclick=hidePrompt;
-$("dvol").oninput=e=>{drone.vol=+e.target.value;if(drone.v)drone.v.g.gain.setTargetAtTime(.45*drone.vol+.0001,ac.currentTime,.05)};
-function releaseAllVoices(){[...voices.keys()].forEach(k=>voiceOff(k))}
-["pointerdown","keydown","touchstart"].forEach(ev=>addEventListener(ev,()=>{if(snd.on)initAudio()},{passive:true}));
-document.getElementById("learn").onclick=e=>{learn=!learn;e.target.classList.toggle("on",learn);e.target.textContent=learn?"Play a note…":"Set tonic from next note"};
-document.getElementById("names").onchange=render;
+      /* ---- glass controls ---- */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 18px;
+        border-radius: 999px;
+        background: var(--glass);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(18px) saturate(1.3);
+        -webkit-backdrop-filter: blur(18px) saturate(1.3);
+        cursor: pointer;
+        font-size: 17px;
+        transition:
+          background 0.5s var(--ease),
+          transform 0.5s var(--ease),
+          border-color 0.5s var(--ease);
+      }
+      .pill:hover {
+        background: rgba(255, 255, 255, 0.11);
+      }
+      .pill:active {
+        transform: scale(0.97);
+      }
+      .pill.on {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.42);
+      }
+      .pill.sm {
+        height: 36px;
+        padding: 0 14px;
+        font-size: 14px;
+        color: var(--dim);
+      }
+      .pill.sm.on {
+        color: #fff;
+      }
+      .dropdown {
+        position: relative;
+      }
+      .dropdown > .pill {
+        padding: 0 16px;
+        gap: 10px;
+        white-space: nowrap;
+      }
+      .ico {
+        width: 20px;
+        height: 20px;
+        flex: none;
+      }
+      .chev {
+        width: 7px;
+        height: 7px;
+        border: solid var(--dim);
+        border-width: 0 1.8px 1.8px 0;
+        transform: rotate(45deg) translate(-2px, -2px);
+        transition: transform 0.7s var(--spring);
+        flex: none;
+      }
+      .dropdown.open .chev {
+        transform: rotate(225deg) translate(-2px, -2px);
+      }
+      .menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        z-index: 30;
+        min-width: 100%;
+        max-height: min(320px, 52vh);
+        overflow: auto;
+        margin: 0;
+        padding: 6px;
+        list-style: none;
+        border-radius: 22px;
+        background: rgba(26, 24, 38, 0.72);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(26px) saturate(1.3);
+        -webkit-backdrop-filter: blur(26px) saturate(1.3);
+        box-shadow: 0 24px 50px -14px rgba(0, 0, 0, 0.65);
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-8px) scale(0.9);
+        transform-origin: top left;
+        transition:
+          transform 0.7s var(--spring),
+          opacity 0.3s var(--ease),
+          visibility 0s 0.7s;
+        scrollbar-width: thin;
+      }
+      .dropdown.r .menu {
+        left: auto;
+        right: 0;
+        transform-origin: top right;
+      }
+      .dropdown.open .menu {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+        transition-delay: 0s;
+      }
+      .menu li {
+        padding: 9px 16px;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 15px;
+        white-space: nowrap;
+        color: var(--dim);
+        transition:
+          background 0.3s var(--ease),
+          color 0.3s var(--ease);
+      }
+      .menu li.hl,
+      .menu li:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+      .menu li[aria-selected="true"] {
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
+      }
+      .right {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        margin-left: auto;
+      }
+      #drone {
+        border: 0;
+        background: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        font-size: 17px;
+        padding: 6px;
+      }
+      .dd {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1.5px solid rgba(255, 255, 255, 0.4);
+        transition: all 0.6s var(--ease);
+      }
+      #drone[aria-checked="true"] .dd {
+        background: radial-gradient(circle at 35% 30%, #fff, var(--acc));
+        border-color: var(--acc);
+        box-shadow: 0 0 16px 3px var(--acc);
+      }
+      .vol {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 17px;
+      }
+      #vol {
+        -webkit-appearance: none;
+        appearance: none;
+        width: clamp(110px, 16vw, 210px);
+        height: 8px;
+        border-radius: 99px;
+        margin: 0;
+        cursor: pointer;
+        background:
+          linear-gradient(90deg, var(--acc2), var(--acc)) 0 /
+            calc(var(--v, 60%)) 100% no-repeat,
+          rgba(255, 255, 255, 0.2);
+      }
+      #vol::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #fff, var(--acc));
+        box-shadow: 0 2px 12px var(--acc);
+      }
+      #vol::-moz-range-thumb {
+        width: 26px;
+        height: 26px;
+        border: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #fff, var(--acc));
+        box-shadow: 0 2px 12px var(--acc);
+      }
+      .ctl {
+        position: relative;
+        z-index: 40;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
 
-const stText=$("stext"),sdot=$("sdot"),help=$("help"),conn=$("connect");
-function setStatus(kind,msg,tip){sdot.className=kind;stText.textContent=msg;help.textContent=tip||"";help.hidden=!tip}
-function wire(acc){
- const ins=[...acc.inputs.values()];
- ins.forEach(i=>{i.onmidimessage=m=>{
-  const [st,k,v]=m.data,cmd=st&0xf0,ch=st&0x0f,pre="m"+i.id+"-"+ch+"-";
-  if(cmd===0x90&&v>0)noteOn(k%12,pre+k,k,v/127);
-  else if(cmd===0x80||(cmd===0x90&&v===0))noteOff(k%12,pre+k);
-  else if(cmd===0xB0&&(k===123||k===120)){[...active].forEach(a=>{if(a.startsWith(pre))noteOff(+a.slice(pre.length)%12,a)})}
- }});
- if(ins.length){setStatus("ok","Connected: "+ins.map(i=>i.name||"MIDI device").join(", "));conn.hidden=true}
- else{setStatus("warn","No MIDI keyboard detected.","Plug in and switch on your keyboard, and close other apps that may be using it (a DAW, for example). It will connect automatically, or press Rescan.");conn.textContent="Rescan";conn.hidden=false}
-}
-function precheck(){
- if(!window.isSecureContext){setStatus("bad","MIDI needs a secure page.","Open this page over https:// – browsers block MIDI on plain http.");conn.hidden=true;return false}
- if(!navigator.requestMIDIAccess){
-  setStatus("warn","This browser does not support Web MIDI.","Use Chrome, Edge or Opera on desktop, Chrome on Android, or Firefox 108+. Safari and iPhone/iPad browsers do not support Web MIDI. You can still play with the on-screen keys, your computer keyboard, or by clicking the dots.");
-  conn.hidden=true;return false}
- return true}
-async function connectMIDI(){
- const embedded=window.top!==window;
- if(!precheck())return;
- setStatus("wait","Waiting for MIDI permission…","Choose Allow when your browser asks. Firefox may ask you to install a small site-permission add-on.");
- conn.hidden=true;
- try{
-  const acc=await navigator.requestMIDIAccess({sysex:false});
-  acc.onstatechange=()=>wire(acc);wire(acc);
- }catch(err){
-  const n=err&&err.name;
-  if(n==="SecurityError"||n==="NotAllowedError")
-   setStatus("bad","MIDI permission was blocked.",embedded?"This page is embedded, which can block MIDI. Open it in its own browser tab, then allow MIDI access.":"Click the lock or tune icon in the address bar, set MIDI devices to Allow, then press Connect. (Chrome: Site settings → MIDI devices.)");
-  else if(n==="AbortError"||n==="InvalidStateError")
-   setStatus("warn","The browser could not open MIDI.","Close other apps or tabs using your keyboard, reconnect it, and try again.");
-  else setStatus("bad","Could not start MIDI.","Something went wrong ("+(n||"unknown error")+"). Reload the page, or use the on-screen keys.");
-  conn.textContent="Connect MIDI keyboard";conn.hidden=false;
- }
-}
-conn.onclick=connectMIDI;
-// No permission prompt on load: the user starts it with the button.
-// (If the browser already remembers "allow", connect quietly.)
-if(precheck()){
- setStatus("warn","MIDI keyboard not connected","Click Connect MIDI keyboard to allow access.");
- conn.textContent="Connect MIDI keyboard";conn.hidden=false;
- try{navigator.permissions.query({name:"midi"}).then(p=>{if(p.state==="granted")connectMIDI()}).catch(()=>{})}catch(e){}
-}
+      /* ---- chord history: organized into sections by root note & scale ---- */
+      #chords {
+        position: relative;
+        --rh: clamp(52px, 8.5vh, 84px);
+        --gap: clamp(8px, 1.5vh, 16px);
+      }
+      #vp {
+        height: calc(var(--rh) * 2 + var(--gap) + 40px);
+        padding: 8px 8px 12px;
+        margin: -8px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      }
+      #vp::-webkit-scrollbar {
+        width: 4px;
+      }
+      #vp::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #vp::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+      }
+      #track {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(14px, 2.2vh, 22px);
+      }
+      .c-section {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(8px, 1.4vh, 12px);
+        animation: fadeIn 0.5s var(--ease) both;
+      }
+      .c-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 2px 2px;
+        user-select: none;
+      }
+      .c-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 13px 4px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 3px 12px -2px rgba(0, 0, 0, 0.35);
+        transition:
+          border-color 0.4s var(--ease),
+          background 0.4s var(--ease);
+      }
+      .c-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--sc, var(--acc));
+        box-shadow: 0 0 10px 1.5px var(--sc, var(--acc));
+        transition:
+          background 0.4s var(--ease),
+          box-shadow 0.4s var(--ease);
+      }
+      .c-title {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: #fff;
+        white-space: nowrap;
+      }
+      .c-sep {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.02)
+        );
+      }
+      .c-body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        align-items: center;
+        text-align: center;
+        height: var(--rh);
+        flex: none;
+        opacity: 0.5;
+        transition: opacity 0.9s var(--ease);
+      }
+      .row.past {
+        opacity: 0.42;
+      }
+      .row.now {
+        opacity: 1;
+      }
+      .row sup {
+        font-size: 0.42em;
+        font-weight: 500;
+        margin-left: 2px;
+        vertical-align: 0.95em;
+        line-height: 0;
+      }
+      .row > span {
+        display: block;
+        white-space: nowrap;
+        font-size: clamp(30px, 4.8vw, 62px);
+        font-weight: 600;
+        line-height: 1;
+        color: var(--c, #fff);
+      }
+      .row.now > span {
+        text-shadow: 0 0 26px var(--c);
+      }
+      .row > span.in {
+        animation: fadeIn 0.9s ease-out both;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      #cHint {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: var(--dim);
+        font-size: clamp(18px, 2vw, 26px);
+        pointer-events: none;
+        transition: opacity 0.9s var(--ease);
+      }
+      #chords.has #cHint {
+        opacity: 0;
+      }
 
-// on-screen piano: two octaves + top C, follows the current octave
-const pianoEl=$("piano");let pkeys=[];
-function buildPiano(){
- pianoEl.innerHTML="";pkeys=[];
- const W=[0,2,4,5,7,9,11],B=[[1,0],[3,1],[6,3],[8,4],[10,5]],w=100/15,bw=w*.62,lo=base();
- const mk=(cls,midi,left,wd)=>{
-  const b=document.createElement("button");b.className=cls;b.setAttribute("aria-label",N[midi%12]+(Math.floor(midi/12)-1));
-  b.style.left=left+"%";b.style.width=wd+"%";
-  if(cls==="wk"&&midi%12===0){const sp=document.createElement("span");sp.textContent="C"+(Math.floor(midi/12)-1);b.appendChild(sp)}
-  pianoEl.appendChild(b);const src="p"+midi;
-  b.addEventListener("pointerdown",e=>{e.preventDefault();b.setPointerCapture&&b.setPointerCapture(e.pointerId);noteOn(midi%12,src,midi)});
-  ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>b.addEventListener(ev,()=>noteOff(midi%12,src)));
-  pkeys.push({b,midi})};
- for(let o=0;o<2;o++)W.forEach((s,i)=>mk("wk",lo+o*12+s,(o*7+i)*w,w));
- mk("wk",lo+24,14*w,w);
- for(let o=0;o<2;o++)B.forEach(([s,i])=>mk("bk",lo+o*12+s,(o*7+i+1)*w-bw/2,bw));
- $("octl").textContent="C"+oct+" – C"+(oct+2);
- updatePiano();
-}
-function updatePiano(){
- const lo=base(),hi=lo+24;let below=false,above=false;const on=new Map();
- srcMidi.forEach(m=>{if(m<lo)below=true;else if(m>hi)above=true;else on.set(m,1)});
- pkeys.forEach(({b,midi})=>{
-  if(on.has(midi)){const d=(((midi-tonic)%12)+12)%12;b.classList.add("on");b.style.background=col(pos(d))}
-  else{b.classList.remove("on");b.style.background=""}});
- $("octd").classList.toggle("alert",below);$("octu").classList.toggle("alert",above);
-}
-function setOct(n){oct=Math.max(0,Math.min(7,n));buildPiano()}
-$("octd").onclick=()=>setOct(oct-1);$("octu").onclick=()=>setOct(oct+1);
+      /* ---- circle ---- */
+      #svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .deg {
+        transform-box: fill-box;
+        transform-origin: center;
+        font-size: 27px;
+        font-weight: 500;
+        fill: rgba(255, 255, 255, 0.72);
+        transition:
+          fill 0.5s var(--ease),
+          transform 0.6s var(--ease);
+      }
+      .deg.out {
+        fill: rgba(255, 255, 255, 0.4);
+      }
+      .deg.on {
+        fill: #fff;
+        animation: bob 1.2s;
+      }
+      .nm {
+        font-size: 17px;
+        fill: rgba(255, 255, 255, 0.5);
+        transition: fill 0.5s var(--ease);
+      }
+      .nm.on {
+        fill: #fff;
+      }
+      .glow {
+        opacity: 0;
+        transition: opacity 0.9s var(--ease);
+      }
+      .glow.on {
+        opacity: 1;
+        transition: opacity 0.12s;
+      }
+      .core {
+        transform-box: fill-box;
+        transform-origin: center;
+        transition: transform 0.9s var(--spring);
+      }
+      .core.on {
+        transform: scale(1.28);
+        animation: boing 1.5s ease-in-out;
+      }
+      .ring {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 3;
+        opacity: 0;
+        transition: opacity 0.5s var(--ease);
+      }
+      .ring.on {
+        opacity: 0.9;
+        transition: opacity 0.1s;
+      }
+      .dot {
+        cursor: pointer;
+      }
+      .tdot {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.4);
+        stroke-width: 1.5;
+      }
+      .center {
+        transform-box: fill-box;
+        transform-origin: center;
+        text-anchor: middle;
+        fill: #fff;
+        font-weight: 500;
+      }
+      #shape {
+        fill: rgba(255, 255, 255, 0.07);
+        stroke: rgba(255, 255, 255, 0.5);
+        stroke-width: 2;
+        stroke-linejoin: round;
+        transition: d 0.4s var(--ease);
+      }
+      @keyframes bob {
+        0% {
+          transform: scale(0.72);
+        }
+        22% {
+          transform: scale(1.28);
+        }
+        42% {
+          transform: scale(0.92);
+        }
+        62% {
+          transform: scale(1.08);
+        }
+        82% {
+          transform: scale(0.98);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes boing {
+        0% {
+          transform: scale(1);
+        }
+        14% {
+          transform: scale(1.8);
+        }
+        30% {
+          transform: scale(1.02);
+        }
+        46% {
+          transform: scale(1.48);
+        }
+        62% {
+          transform: scale(1.16);
+        }
+        78% {
+          transform: scale(1.36);
+        }
+        100% {
+          transform: scale(1.28);
+        }
+      }
+      @keyframes dip {
+        0% {
+          transform: translateY(0);
+        }
+        22% {
+          transform: translateY(8px);
+        }
+        44% {
+          transform: translateY(-1px);
+        }
+        64% {
+          transform: translateY(5px);
+        }
+        82% {
+          transform: translateY(1px);
+        }
+        100% {
+          transform: translateY(3px);
+        }
+      }
+      .bump {
+        animation: bob 1.1s;
+      }
 
-// computer keyboard: a w s e d f t g y h u j k o l p ; ' = C..F (1.5 octaves); Z / X change octave
-const KM="awsedftgyhujkolp;'";
-const typing=e=>e.target.tagName==="TEXTAREA"||(e.target.tagName==="INPUT"&&!["checkbox","range"].includes(e.target.type));
-addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||typing(e))return;
- const k=e.key.toLowerCase();
- if(e.target.tagName==="SELECT"&&(k==="z"||k==="x"||KM.includes(k)))e.preventDefault(); // stop the dropdown's type-ahead
- if(k==="z"||k==="x"){if(!e.repeat)setOct(oct+(k==="x"?1:-1));return}
- if(e.repeat||!$("kb").checked)return;
- const i=KM.indexOf(k);if(i>=0)noteOn(i%12,"k"+i,base()+i)});
-addEventListener("keyup",e=>{const i=KM.indexOf(e.key.toLowerCase());if(i>=0)noteOff(i%12,"k"+i)});
-addEventListener("blur",()=>{releaseAllVoices();active.clear();srcMidi.clear();held.clear();render()});
-$("snd").onchange=e=>{snd.on=e.target.checked;if(snd.on)initAudio();else{releaseAllVoices();setDrone(false)}hint()};
-$("vol").oninput=e=>{snd.vol=+e.target.value;if(master)master.gain.value=snd.vol*.6};
-$("wave").onchange=e=>{snd.wave=e.target.value;e.target.blur()};
-initAudio();
-buildPiano();
-setTonic(0);
-</script>
-</body>
+      /* ---- piano ---- */
+      .piano {
+        position: relative;
+        width: 100%;
+        height: clamp(120px, 15vw, 190px);
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .wk,
+      .bk {
+        position: absolute;
+        top: 0;
+        padding: 0;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          background 0.7s var(--ease),
+          box-shadow 0.7s var(--ease);
+      }
+      .wk {
+        height: 100%;
+        background: linear-gradient(180deg, #fbf8ff, #e6def0);
+        border: 0;
+        border-right: 2px solid rgba(40, 20, 80, 0.25);
+        border-radius: 0 0 9px 9px;
+        box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
+      }
+      .bk {
+        height: 60%;
+        background: linear-gradient(180deg, #0f0b1c, #241c38);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-top: 0;
+        border-radius: 0 0 7px 7px;
+        z-index: 2;
+      }
+      .wk.on {
+        background: linear-gradient(
+          180deg,
+          #fff 10%,
+          color-mix(in srgb, var(--c) 62%, #fff)
+        );
+        box-shadow: 0 10px 30px -2px var(--c);
+        transition-duration: 0.08s;
+      }
+      .bk.on {
+        background: linear-gradient(
+          180deg,
+          #1a1430,
+          color-mix(in srgb, var(--c) 75%, #1a1430)
+        );
+        transition-duration: 0.08s;
+      }
+      .wk.on,
+      .bk.on {
+        animation: dip 1s ease-in-out;
+        transform: translateY(3px);
+      }
+      .wk span {
+        position: absolute;
+        bottom: 7px;
+        left: 0;
+        right: 0;
+        font-size: 11px;
+        color: rgba(40, 20, 80, 0.5);
+        pointer-events: none;
+      }
+      .obar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        font-size: 14px;
+        color: var(--dim);
+      }
+      .obar .pill {
+        height: 32px;
+        padding: 0 12px;
+        font-size: 15px;
+      }
+      .obar .alert {
+        border-color: #fff;
+        box-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+      }
+      #octl {
+        min-width: 96px;
+        text-align: center;
+      }
+      #tip {
+        min-height: 1.4em;
+        font-size: 15px;
+        color: var(--dim);
+        text-align: center;
+        margin-top: 8px;
+        transition: color 0.5s var(--ease);
+      }
+      #tip.warn {
+        color: #ffd28a;
+      }
+
+      /* ---- midi status ---- */
+      #status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 1.4em;
+      }
+      #sdot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #888;
+      }
+      #sdot.ok {
+        background: #3ddc84;
+        box-shadow: 0 0 8px #3ddc84;
+      }
+      #sdot.warn {
+        background: #ffb84d;
+      }
+      #sdot.bad {
+        background: #ff5c6c;
+      }
+      #sdot.wait {
+        background: #a99bff;
+      }
+      #help {
+        max-width: 560px;
+        line-height: 1.45;
+      }
+      #connect {
+        border: 0;
+        background: rgba(255, 255, 255, 0.9);
+        color: #1a1238;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      @media (max-width: 900px) {
+        .stage {
+          grid-template-columns: 1fr;
+        }
+        .wheel {
+          width: min(92vw, 520px);
+        }
+        .right {
+          margin-left: 0;
+          width: 100%;
+          justify-content: space-between;
+        }
+        .ctl {
+          justify-content: flex-start;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition-duration: 0.01s !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-mode="major">
+    <div class="bg" aria-hidden="true">
+      <div class="bg-rotator" id="bgRotator">
+        <div class="tone"><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+
+    <div class="app">
+      <header class="top">
+        <div
+          class="dropdown"
+          id="waveDD"
+          data-tip="Instrument for the keys. Choose None to mute the keys."
+        >
+          <button
+            class="pill"
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="Key sound"
+          >
+            <svg class="ico" viewBox="0 0 22 20" aria-hidden="true">
+              <rect
+                x="1"
+                y="2"
+                width="20"
+                height="16"
+                rx="2.5"
+                fill="none"
+                stroke="#fff"
+                stroke-width="1.6"
+              />
+              <rect x="5" y="2" width="2.2" height="9" fill="#fff" />
+              <rect x="9.9" y="2" width="2.2" height="9" fill="#fff" />
+              <rect x="14.8" y="2" width="2.2" height="9" fill="#fff" /></svg
+            ><span class="lbl"></span><i class="chev"></i>
+          </button>
+          <ul class="menu" role="listbox"></ul>
+        </div>
+        <div class="right">
+          <button
+            id="drone"
+            role="switch"
+            aria-checked="false"
+            data-tip="Drone: hold the key's root note under your playing. Click to turn on or off."
+          >
+            <span class="dd"></span>Drone
+          </button>
+          <label class="vol" data-tip="Master volume for keys and drone."
+            ><span>Master volume</span
+            ><input
+              type="range"
+              id="vol"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.6"
+              aria-label="Master volume"
+          /></label>
+        </div>
+      </header>
+
+      <main class="stage">
+        <div
+          class="wheel"
+          data-tip="Tap a dot to play that scale degree. Notes you play light up here."
+        >
+          <svg
+            id="svg"
+            viewBox="-90 -70 780 740"
+            role="img"
+            aria-label="Circle of fifths by scale degree"
+          >
+            <defs id="defs"></defs>
+            <circle
+              cx="300"
+              cy="300"
+              r="250"
+              fill="none"
+              stroke="rgba(255,255,255,.16)"
+              stroke-width="1.5"
+            />
+            <g id="spokes"></g>
+            <path id="shape" d="" />
+            <g id="g"></g>
+            <text id="c1" class="center" x="300" y="312" font-size="64"></text>
+            <text
+              id="c2"
+              class="center"
+              x="300"
+              y="352"
+              font-size="22"
+              fill="rgba(255,255,255,.55)"
+            ></text>
+          </svg>
+        </div>
+
+        <div class="side">
+          <div class="ctl">
+            <button
+              class="pill sm"
+              id="learn"
+              data-tip="Set the key from the next note you play."
+            >
+              Set key by ear
+            </button>
+            <button
+              class="pill sm"
+              id="names"
+              aria-pressed="false"
+              data-tip="Show note names on the circle."
+            >
+              Note names
+            </button>
+            <div class="dropdown r" id="keyDD" data-tip="Key (tonic).">
+              <button
+                class="pill"
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Key"
+              >
+                <span class="lbl"></span><i class="chev"></i>
+              </button>
+              <ul class="menu" role="listbox"></ul>
+            </div>
+            <div
+              class="dropdown r"
+              id="modeDD"
+              data-tip="Major or minor scale. The background colours follow the key."
+            >
+              <button
+                class="pill"
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Scale"
+              >
+                <span class="lbl"></span><i class="chev"></i>
+              </button>
+              <ul class="menu" role="listbox"></ul>
+            </div>
+          </div>
+          <section
+            id="chords"
+            data-tip="The chords you play, in order. Full lines move up; scroll to see your history."
+          >
+            <div id="vp"><div id="track"></div></div>
+            <div id="cHint">Try playing a chord…</div>
+          </section>
+          <div>
+            <div
+              class="piano"
+              id="piano"
+              aria-label="On-screen keyboard"
+              data-tip="Click keys, use your computer keyboard, or plug in a MIDI keyboard."
+            ></div>
+            <div class="obar">
+              <button
+                class="pill"
+                id="octd"
+                data-tip="Lower octave (Z)"
+                aria-label="Lower octave"
+              >
+                ‹</button
+              ><span id="octl"></span
+              ><button
+                class="pill"
+                id="octu"
+                data-tip="Higher octave (X)"
+                aria-label="Higher octave"
+              >
+                ›
+              </button>
+            </div>
+            <div id="tip" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="foot">
+        <div id="status" role="status" aria-live="polite">
+          <span id="sdot" class="wait"></span
+          ><span id="stext">Connecting to MIDI…</span
+          ><button id="connect" hidden>Connect MIDI keyboard</button>
+        </div>
+        <div id="help" hidden></div>
+      </footer>
+    </div>
+    <noscript>This visualizer needs JavaScript enabled.</noscript>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const N = [
+        "C",
+        "C♯",
+        "D",
+        "E♭",
+        "E",
+        "F",
+        "F♯",
+        "G",
+        "A♭",
+        "A",
+        "B♭",
+        "B",
+      ];
+      const NS = "http://www.w3.org/2000/svg",
+        CX = 300,
+        CY = 300,
+        R = 250;
+      let tonic = 0,
+        learn = false,
+        mode = "major",
+        KN = [],
+        SCALE = new Set();
+      const IV = {
+        major: [0, 2, 4, 5, 7, 9, 11],
+        minor: [0, 2, 3, 5, 7, 8, 10],
+      };
+      const KEYS = {
+        major: [
+          "C",
+          "D♭",
+          "D",
+          "E♭",
+          "E",
+          "F",
+          "F♯",
+          "G",
+          "A♭",
+          "A",
+          "B♭",
+          "B",
+        ],
+        minor: [
+          "C",
+          "C♯",
+          "D",
+          "E♭",
+          "E",
+          "F",
+          "F♯",
+          "G",
+          "G♯",
+          "A",
+          "B♭",
+          "B",
+        ],
+      };
+      const SHP = [
+          "C",
+          "C♯",
+          "D",
+          "D♯",
+          "E",
+          "F",
+          "F♯",
+          "G",
+          "G♯",
+          "A",
+          "A♯",
+          "B",
+        ],
+        FLT = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
+      const LET = "CDEFGAB",
+        LPC = [0, 2, 4, 5, 7, 9, 11],
+        ACC = { "-2": "𝄫", "-1": "♭", 0: "", 1: "♯", 2: "𝄪" };
+      const keyName = (t) => KEYS[mode][t];
+      function spell() {
+        const root = keyName(tonic),
+          li = LET.indexOf(root[0]),
+          iv = IV[mode],
+          out = new Array(12).fill(null);
+        iv.forEach((s, i) => {
+          const L = LET[(li + i) % 7],
+            pc = (tonic + s) % 12,
+            diff = ((pc - LPC[LET.indexOf(L)] + 18) % 12) - 6;
+          out[s] = L + ACC[diff];
+        });
+        const j = out.filter(Boolean).join(""),
+          T = j.includes("♯") ? SHP : j.includes("♭") ? FLT : N;
+        for (let i = 0; i < 12; i++)
+          if (out[i] == null) out[i] = T[(tonic + i) % 12];
+        KN = out;
+        SCALE = new Set(iv);
+      }
+      const held = new Map(),
+        pos = (d) => (d * 7) % 12;
+
+      /* ---- 12 warm & cool color pairs (one for each root key) ---- */
+      /* Format: [Hue, Saturation %, Lightness %] */
+      const KEY_PALETTES = [
+        // 0: C  -> Amber Gold (Warm) & Royal Azure (Cool)
+        { warm: [26, 90, 50], cool: [222, 86, 52] },
+        // 1: C# -> Crimson Rose (Warm) & Mint Seafoam (Cool)
+        { warm: [340, 82, 52], cool: [174, 88, 40] },
+        // 2: D  -> Sunburst Tangerine (Warm) & Electric Cobalt (Cool)
+        { warm: [18, 92, 50], cool: [226, 90, 54] },
+        // 3: Eb -> Coral Flame (Warm) & Twilight Indigo (Cool)
+        { warm: [8, 86, 54], cool: [248, 74, 56] },
+        // 4: E  -> Radiant Marigold (Warm) & Aquamarine (Cool)
+        { warm: [38, 92, 48], cool: [198, 90, 44] },
+        // 5: F  -> Spiced Terracotta (Warm) & Emerald Teal (Cool)
+        { warm: [15, 88, 46], cool: [160, 84, 40] },
+        // 6: F# -> Vibrant Magenta (Warm) & Turquoise Cyan (Cool)
+        { warm: [332, 86, 54], cool: [186, 92, 44] },
+        // 7: G  -> Honey Amber (Warm) & Lapis Ultramarine (Cool)
+        { warm: [42, 90, 46], cool: [230, 82, 50] },
+        // 8: Ab -> Ruby Wine (Warm) & Oceanic Teal (Cool)
+        { warm: [346, 86, 46], cool: [178, 84, 36] },
+        // 9: A  -> Persimmon Orange (Warm) & Iris Periwinkle (Cool)
+        { warm: [24, 92, 52], cool: [256, 86, 60] },
+        // 10: Bb-> Crimson Scarlet (Warm) & Glacier Cerulean (Cool)
+        { warm: [0, 84, 52], cool: [204, 90, 44] },
+        // 11: B -> Flamingo Rose (Warm) & Arctic Azure (Cool)
+        { warm: [352, 90, 56], cool: [192, 90, 44] },
+      ];
+
+      const col = (p) => {
+        const pal = KEY_PALETTES[tonic] || KEY_PALETTES[0];
+        const baseHue = mode === "minor" ? pal.cool[0] : pal.warm[0];
+        return `hsl(${(baseHue + p * 19) % 360} 64% 68%)`;
+      };
+
+      let bgRot = 0;
+      function updateRotation() {
+        const rotator = $("bgRotator");
+        if (rotator) {
+          rotator.style.transform = `rotate(${bgRot}deg)`;
+        }
+      }
+
+      function applyPalette() {
+        const pal = KEY_PALETTES[tonic] || KEY_PALETTES[0];
+        const isMinor = mode === "minor";
+
+        // Keep Side 1 as Warm and Side 2 as Cool on the rotator plane.
+        // The 180deg background rotation gracefully swaps their positions in physical space.
+        const s1 = pal.warm;
+        const s2 = pal.cool;
+
+        const st = document.body.style;
+        // Deep, glare-free background base tones
+        const L_base = isMinor ? 14 : 16;
+        const L_sub = isMinor ? 9 : 11;
+
+        st.setProperty(
+          "--c-side1",
+          `hsl(${s1[0]} ${Math.round(s1[1] * 0.65)}% ${L_base}%)`,
+        );
+        st.setProperty(
+          "--c-side2",
+          `hsl(${s2[0]} ${Math.round(s2[1] * 0.65)}% ${L_base}%)`,
+        );
+        st.setProperty(
+          "--c-side1-subtle",
+          `hsl(${s1[0]} ${Math.round(s1[1] * 0.55)}% ${L_sub}%)`,
+        );
+        st.setProperty(
+          "--c-side2-subtle",
+          `hsl(${s2[0]} ${Math.round(s2[1] * 0.55)}% ${L_sub}%)`,
+        );
+        st.setProperty("--c-mid", "#080712");
+
+        // Gentle, soft tone clouds without harsh flares
+        st.setProperty("--b1", `hsla(${s1[0]}, ${s1[1]}%, ${s1[2]}%, 0.28)`);
+        st.setProperty(
+          "--b2",
+          `hsla(${(s1[0] + 16) % 360}, ${Math.round(s1[1] * 0.7)}%, ${Math.round(s1[2] * 0.85)}%, 0.2)`,
+        );
+        st.setProperty("--b3", `hsla(${s2[0]}, ${s2[1]}%, ${s2[2]}%, 0.28)`);
+        st.setProperty(
+          "--b4",
+          `hsla(${(s2[0] + 16) % 360}, ${Math.round(s2[1] * 0.7)}%, ${Math.round(s2[2] * 0.85)}%, 0.2)`,
+        );
+
+        // Control accents
+        const primaryAcc = isMinor ? s2 : s1;
+        const secondaryAcc = isMinor ? s1 : s2;
+        st.setProperty("--acc", `hsl(${primaryAcc[0]} ${primaryAcc[1]}% 72%)`);
+        st.setProperty(
+          "--acc2",
+          `hsl(${secondaryAcc[0]} ${secondaryAcc[1]}% 68%)`,
+        );
+      }
+
+      const bounce = (e) => {
+        e.classList.remove("bump");
+        void e.getBoundingClientRect();
+        e.classList.add("bump");
+      };
+
+      // custom dropdown: glass pill + listbox, keyboard accessible
+      function Dropdown(root, { opts = [], value, onChange }) {
+        const btn = root.querySelector("button"),
+          lab = root.querySelector(".lbl"),
+          ul = root.querySelector("ul");
+        let o = opts,
+          val = value,
+          hl = -1;
+        const isOpen = () => root.classList.contains("open");
+        const paint = () =>
+          [...ul.children].forEach((li, i) => {
+            li.classList.toggle("hl", i === hl);
+            li.setAttribute("aria-selected", o[i].v == val);
+          });
+        const open = () => {
+          root.classList.add("open");
+          btn.setAttribute("aria-expanded", "true");
+          hl = o.findIndex((x) => x.v == val);
+          paint();
+          ul.children[hl] &&
+            ul.children[hl].scrollIntoView({ block: "nearest" });
+        };
+        const close = () => {
+          root.classList.remove("open");
+          btn.setAttribute("aria-expanded", "false");
+        };
+        const set = (v, fire) => {
+          val = v;
+          const x = o.find((x) => x.v == v);
+          lab.textContent = x ? x.l : "";
+          paint();
+          if (fire && onChange) onChange(v);
+        };
+        const render = () => {
+          ul.innerHTML = "";
+          o.forEach((x) => {
+            const li = document.createElement("li");
+            li.setAttribute("role", "option");
+            li.textContent = x.l;
+            li.onclick = () => {
+              set(x.v, true);
+              close();
+            };
+            ul.appendChild(li);
+          });
+          set(val);
+        };
+        btn.onclick = (e) => {
+          if (e.detail === 0) return;
+          isOpen() ? close() : open();
+        };
+        btn.onkeydown = (e) => {
+          const k = e.key;
+          if (!isOpen()) {
+            if (["ArrowDown", "ArrowUp", "Enter", " "].includes(k)) {
+              e.preventDefault();
+              open();
+            }
+            return;
+          }
+          if (k === "ArrowDown" || k === "ArrowUp") {
+            e.preventDefault();
+            hl = (hl + (k === "ArrowDown" ? 1 : -1) + o.length) % o.length;
+            paint();
+            ul.children[hl].scrollIntoView({ block: "nearest" });
+          } else if (k === "Enter" || k === " ") {
+            e.preventDefault();
+            set(o[hl].v, true);
+            close();
+          } else if (k === "Escape" || k === "Tab") close();
+        };
+        btn.onkeyup = (e) => {
+          if (e.key === " ") e.preventDefault();
+        };
+        document.addEventListener("pointerdown", (e) => {
+          if (!root.contains(e.target)) close();
+        });
+        render();
+        return {
+          set: (v) => set(v),
+          setOptions: (n, v) => {
+            o = n;
+            val = v;
+            render();
+          },
+        };
+      }
+      const el = (t, a, p) => {
+        const e = document.createElementNS(NS, t);
+        for (const k in a) e.setAttribute(k, a[k]);
+        p && p.appendChild(e);
+        return e;
+      };
+
+      // Roman numeral for an interval above the tonic; q: M major, m minor, d diminished, a augmented
+      const BASE = [
+        "I",
+        "♭II",
+        "II",
+        "♭III",
+        "III",
+        "IV",
+        "♭V",
+        "V",
+        "♭VI",
+        "VI",
+        "♭VII",
+        "VII",
+      ];
+      const SUF = { M: "", m: "", d: "°", a: "+", s2: "sus2", s4: "sus4" };
+      function numParts(iv, q) {
+        let s = BASE[iv];
+        if (mode === "minor") {
+          if (iv === 3) s = "III";
+          if (iv === 8) s = "VI";
+          if (iv === 10) s = "VII";
+        }
+        if (q === "m" || q === "d") s = s.toLowerCase();
+        return [s, SUF[q] || ""];
+      }
+      const numeral = (iv, q) => numParts(iv, q).join("");
+      const numHTML = (iv, q) => {
+        const [a, b] = numParts(iv, q);
+        return a + (b ? `<sup>${b}</sup>` : "");
+      };
+
+      // ---- tips: one quiet line that explains whatever you point at ----
+      const DEFAULT_TIP =
+        "Use keyboard's A to ' keys to play notes. Z / X change octave.";
+      let hoverTip = "",
+        blocked = false;
+      function showTip() {
+        const t = $("tip");
+        t.classList.toggle("warn", blocked && !hoverTip);
+        t.textContent =
+          hoverTip ||
+          (blocked
+            ? "Click or press a key once to switch sound on."
+            : DEFAULT_TIP);
+      }
+      const tipOf = (e) => {
+        const x = e.target.closest && e.target.closest("[data-tip]");
+        return x ? x.dataset.tip : "";
+      };
+      ["pointerover", "focusin"].forEach((ev) =>
+        document.addEventListener(ev, (e) => {
+          hoverTip = tipOf(e);
+          showTip();
+        }),
+      );
+      ["pointerout", "focusout"].forEach((ev) =>
+        document.addEventListener(ev, () => {
+          hoverTip = "";
+          showTip();
+        }),
+      );
+
+      // ---- key / mode controls ----
+      const keyDD = Dropdown($("keyDD"), {
+        value: 0,
+        onChange: (v) => setTonic(+v),
+      });
+      const modeDD = Dropdown($("modeDD"), {
+        opts: [
+          { v: "major", l: "Major" },
+          { v: "minor", l: "Minor" },
+        ],
+        value: "major",
+        onChange: setMode,
+      });
+      function labelKeys() {
+        keyDD.setOptions(
+          KEYS[mode].map((n, i) => ({ v: i, l: n })),
+          tonic,
+        );
+      }
+      function setTonic(t) {
+        tonic = t;
+        learn = false;
+        $("learn").classList.remove("on");
+        $("learn").textContent = "Set key by ear";
+        keyDD.set(t);
+        applyPalette();
+        spell();
+        build();
+        render();
+        buildChords();
+        if (drone.on) droneStart();
+      }
+      function setMode(m) {
+        if (m !== mode) {
+          // Increment 180° rotation on scale change for a calm continuous revolution
+          bgRot += 180;
+          updateRotation();
+        }
+        mode = m;
+        document.body.dataset.mode = m;
+        modeDD.set(m);
+        labelKeys();
+        applyPalette();
+        spell();
+        build();
+        render();
+        buildChords();
+      }
+      $("learn").onclick = (e) => {
+        learn = !learn;
+        e.currentTarget.classList.toggle("on", learn);
+        e.currentTarget.textContent = learn ? "Play a note…" : "Set key by ear";
+      };
+      $("names").onclick = (e) => {
+        const b = e.currentTarget;
+        b.classList.toggle("on");
+        b.setAttribute("aria-pressed", b.classList.contains("on"));
+        render();
+      };
+
+      // ---- circle ----
+      const g = $("g"),
+        defs = $("defs");
+      let nodes = {};
+      function build() {
+        g.innerHTML = "";
+        $("spokes").innerHTML = "";
+        [...defs.querySelectorAll("radialGradient[id^=gr]")].forEach((n) =>
+          n.remove(),
+        );
+        nodes = {};
+        for (let d = 0; d < 12; d++) {
+          const p = pos(d),
+            a = (p * Math.PI) / 6 - Math.PI / 2,
+            c = col(p),
+            cs = Math.cos(a),
+            sn = Math.sin(a),
+            x = CX + R * cs,
+            y = CY + R * sn;
+          const gr = el("radialGradient", { id: "gr" + d }, defs);
+          el(
+            "stop",
+            { offset: "0", "stop-color": c, "stop-opacity": ".9" },
+            gr,
+          );
+          el(
+            "stop",
+            { offset: ".4", "stop-color": c, "stop-opacity": ".45" },
+            gr,
+          );
+          el("stop", { offset: "1", "stop-color": c, "stop-opacity": "0" }, gr);
+          const grp = el("g", { class: "dot" }, g);
+          const glow = el(
+            "circle",
+            { cx: x, cy: y, r: 84, fill: `url(#gr${d})`, class: "glow" },
+            grp,
+          );
+          el("circle", { cx: x, cy: y, r: 32, fill: "transparent" }, grp);
+          if (d === 0)
+            el("circle", { cx: x, cy: y, r: 25, class: "tdot" }, grp);
+          const core = el(
+            "circle",
+            {
+              cx: x,
+              cy: y,
+              r: 16,
+              fill: c,
+              style: "filter:drop-shadow(0 0 8px " + c + ")",
+              class: "core",
+            },
+            grp,
+          );
+          const ring = el(
+            "circle",
+            { cx: x, cy: y, r: 16, class: "ring" },
+            grp,
+          );
+          const t = el(
+            "text",
+            {
+              x: CX + (R + 46) * cs,
+              y: CY + (R + 46) * sn + 9,
+              "text-anchor": "middle",
+              class: "deg" + (SCALE.has(d) ? "" : " out"),
+            },
+            g,
+          );
+          t.textContent = numeral(d, "M");
+          const nm = el(
+            "text",
+            {
+              x: CX + (R - 42) * cs,
+              y: CY + (R - 42) * sn + 6,
+              "text-anchor": "middle",
+              class: "nm",
+            },
+            g,
+          );
+          nm.textContent = KN[d];
+          nodes[d] = { glow, ring, core, t, nm, x, y, p };
+          const pc = (tonic + d) % 12;
+          grp.addEventListener("pointerdown", (e) => {
+            e.preventDefault();
+            noteOn(pc, "ptr" + d, base() + pc);
+          });
+          ["pointerup", "pointerleave", "pointercancel"].forEach((ev) =>
+            grp.addEventListener(ev, () => noteOff(pc, "ptr" + d)),
+          );
+        }
+      }
+
+      // triad from the notes currently held, relative to the tonic
+      function chord() {
+        const S = new Set(
+          [...held]
+            .filter(([, c]) => c > 0)
+            .map(([p]) => (p - tonic + 12) % 12),
+        );
+        if (S.size < 3) return null;
+        const bass = srcMidi.size
+          ? ((Math.min(...srcMidi.values()) % 12) - tonic + 12) % 12
+          : -1;
+        const rs = [...S]
+          .sort((a, b) => a - b)
+          .sort((a, b) => (b === bass) - (a === bass));
+        for (const r of rs) {
+          const h = (x) => S.has((r + x) % 12);
+          if (h(4) && h(7)) return { r, q: "M" };
+          if (h(3) && h(7)) return { r, q: "m" };
+          if (h(3) && h(6)) return { r, q: "d" };
+          if (h(4) && h(8)) return { r, q: "a" };
+        }
+        for (const r of rs) {
+          const h = (x) => S.has((r + x) % 12);
+          if (h(5) && h(7)) return { r, q: "s4" };
+          if (h(2) && h(7)) return { r, q: "s2" };
+        }
+        return null;
+      }
+
+      function render() {
+        const names = $("names").classList.contains("on"),
+          act = [];
+        for (let d = 0; d < 12; d++) {
+          const on = (held.get((tonic + d) % 12) || 0) > 0,
+            n = nodes[d];
+          ["glow", "ring", "core", "t", "nm"].forEach((k) =>
+            n[k].classList.toggle("on", on),
+          );
+          n.nm.style.display = names ? "" : "none";
+          if (on) act.push(d);
+        }
+        const pts = act.map((d) => nodes[d]).sort((a, b) => a.p - b.p);
+        $("shape").setAttribute(
+          "d",
+          pts.length > 1
+            ? "M" +
+                pts.map((n) => n.x + " " + n.y).join("L") +
+                (pts.length > 2 ? "Z" : "")
+            : "",
+        );
+        updatePiano();
+        act.sort((a, b) => a - b);
+        const c = chord();
+        if (!act.length) lastSig = "";
+        const t1 = c
+          ? numeral(c.r, c.q)
+          : act.map((d) => numeral(d, "M")).join(" ");
+        if (t1 && t1 !== $("c1").textContent) bounce($("c1"));
+        $("c1").textContent = t1;
+        $("c2").textContent =
+          act.length && names ? act.map((d) => KN[d]).join(" ") : "";
+      }
+
+      // ---- chord history: organized by sections based on root note & scale ----
+      const hist = [];
+      let sections = [],
+        lastSig = "",
+        cT = 0;
+      const colOf = (iv) => col(pos(iv));
+      const secCol = (t, m) => {
+        const pal = KEY_PALETTES[t] || KEY_PALETTES[0];
+        const p = m === "minor" ? pal.cool : pal.warm;
+        return `hsl(${p[0]} ${p[1]}% 70%)`;
+      };
+      const getSectionName = (t, m) =>
+        `${(KEYS[m] && KEYS[m][t]) || N[t]} ${m === "minor" ? "Minor" : "Major"}`;
+
+      function buildChords() {
+        lastSig = "";
+        if (!sections.length) {
+          sections.push({
+            tonic,
+            mode,
+            name: getSectionName(tonic, mode),
+            col: secCol(tonic, mode),
+            chords: [],
+          });
+        } else {
+          const lastSec = sections[sections.length - 1];
+          if (lastSec.chords.length === 0) {
+            if (
+              sections.length > 1 &&
+              sections[sections.length - 2].tonic === tonic &&
+              sections[sections.length - 2].mode === mode
+            ) {
+              sections.pop();
+            } else {
+              lastSec.tonic = tonic;
+              lastSec.mode = mode;
+              lastSec.name = getSectionName(tonic, mode);
+              lastSec.col = secCol(tonic, mode);
+            }
+          } else if (lastSec.tonic !== tonic || lastSec.mode !== mode) {
+            sections.push({
+              tonic,
+              mode,
+              name: getSectionName(tonic, mode),
+              col: secCol(tonic, mode),
+              chords: [],
+            });
+          }
+        }
+        renderChords(false);
+      }
+
+      function renderChords(follow) {
+        const tr = $("track");
+        const totalChords = sections.reduce((a, s) => a + s.chords.length, 0);
+        $("chords").classList.toggle("has", totalChords > 0);
+
+        while (tr.children.length < sections.length) {
+          const secEl = document.createElement("div");
+          secEl.className = "c-section";
+          secEl.innerHTML =
+            '<div class="c-head"><div class="c-badge"><span class="c-dot"></span><span class="c-title"></span></div><div class="c-sep"></div></div><div class="c-body"></div>';
+          tr.appendChild(secEl);
+        }
+        while (tr.children.length > sections.length) {
+          tr.removeChild(tr.lastChild);
+        }
+
+        sections.forEach((sec, sIdx) => {
+          const secEl = tr.children[sIdx];
+          const badge = secEl.querySelector(".c-badge");
+          badge.style.setProperty("--sc", sec.col);
+          const title = secEl.querySelector(".c-title");
+          if (title.textContent !== sec.name) title.textContent = sec.name;
+
+          const body = secEl.querySelector(".c-body");
+          const isLastSec = sIdx === sections.length - 1;
+          const numRows = Math.max(1, Math.ceil(sec.chords.length / 4));
+
+          while (body.children.length < numRows) {
+            const r = document.createElement("div");
+            r.className = "row";
+            for (let i = 0; i < 4; i++)
+              r.appendChild(document.createElement("span"));
+            body.appendChild(r);
+          }
+          while (body.children.length > numRows) {
+            body.removeChild(body.lastChild);
+          }
+
+          [...body.children].forEach((r, ri) => {
+            const isCurRow = isLastSec && ri === numRows - 1;
+            r.className = "row" + (isCurRow ? " now" : " past");
+            [...r.children].forEach((sp, i) => {
+              const c = sec.chords[ri * 4 + i];
+              if (c) {
+                if (!sp.dataset.k) {
+                  sp.dataset.k = "1";
+                  sp.innerHTML = c.txt;
+                  sp.style.setProperty("--c", c.col);
+                  sp.classList.add("in");
+                }
+              } else if (sp.dataset.k) {
+                delete sp.dataset.k;
+                sp.innerHTML = "";
+                sp.style.removeProperty("--c");
+                sp.classList.remove("in");
+              }
+            });
+          });
+        });
+
+        if (follow) {
+          const v = $("vp");
+          v.scrollTo({ top: v.scrollHeight, behavior: "smooth" });
+        }
+      }
+
+      function scheduleChord() {
+        clearTimeout(cT);
+        cT = setTimeout(() => {
+          const c = chord();
+          if (!c) return;
+          const sig = c.r + c.q;
+          if (sig === lastSig) return;
+          lastSig = sig;
+          let curSec = sections[sections.length - 1];
+          if (
+            !curSec ||
+            (curSec.chords.length > 0 &&
+              (curSec.tonic !== tonic || curSec.mode !== mode))
+          ) {
+            curSec = {
+              tonic,
+              mode,
+              name: getSectionName(tonic, mode),
+              col: secCol(tonic, mode),
+              chords: [],
+            };
+            sections.push(curSec);
+          } else {
+            curSec.tonic = tonic;
+            curSec.mode = mode;
+            curSec.name = getSectionName(tonic, mode);
+            curSec.col = secCol(tonic, mode);
+          }
+          const item = { txt: numHTML(c.r, c.q), col: colOf(c.r) };
+          curSec.chords.push(item);
+          hist.push(item);
+          renderChords(true);
+        }, 110);
+      }
+
+      // ---- notes ----
+      const active = new Set(),
+        srcMidi = new Map();
+      let oct = 3;
+      const base = () => 12 * (oct + 1);
+      function noteOn(pc, src, midi, vel) {
+        if (active.has(src)) return;
+        if (learn) setTonic(pc % 12);
+        const m = midi == null ? 60 + pc : midi;
+        srcMidi.set(src, m);
+        active.add(src);
+        held.set(pc, (held.get(pc) || 0) + 1);
+        voiceOn(src, m, vel == null ? 0.8 : vel);
+        render();
+        scheduleChord();
+      }
+      function noteOff(pc, src) {
+        if (!active.has(src)) return;
+        active.delete(src);
+        srcMidi.delete(src);
+        held.set(pc, Math.max(0, (held.get(pc) || 1) - 1));
+        voiceOff(src);
+        render();
+      }
+
+      // ---- sound (Web Audio): one master volume feeds both keys and drone ----
+      let ac = null,
+        master = null;
+      const voices = new Map(),
+        snd = { on: true, vol: 0.6, wave: "piano" };
+      const WAVES = {
+        piano: {
+          a: 0.004,
+          d: 1.1,
+          s: 0.1,
+          r: 0.3,
+          lp: 4200,
+          o: [
+            ["triangle", 1, 1],
+            ["sine", 2, 0.4],
+            ["sine", 3, 0.15],
+          ],
+        },
+        soft: {
+          a: 0.05,
+          d: 0.3,
+          s: 0.75,
+          r: 0.5,
+          lp: 2600,
+          o: [
+            ["sine", 1, 1],
+            ["sine", 2, 0.2],
+          ],
+        },
+        organ: {
+          a: 0.01,
+          d: 0.05,
+          s: 0.9,
+          r: 0.1,
+          lp: 6000,
+          o: [
+            ["sine", 1, 1],
+            ["sine", 2, 0.6],
+            ["sine", 3, 0.4],
+            ["sine", 4, 0.25],
+          ],
+        },
+        synth: {
+          a: 0.01,
+          d: 0.25,
+          s: 0.6,
+          r: 0.25,
+          lp: 2400,
+          o: [
+            ["sawtooth", 1, 0.6],
+            ["square", 1.006, 0.3],
+          ],
+        },
+      };
+      function initAudio() {
+        if (!ac) {
+          const C = window.AudioContext || window.webkitAudioContext;
+          if (!C) return null;
+          try {
+            ac = new C({ latencyHint: "interactive" });
+          } catch (e) {
+            ac = new C();
+          }
+          const comp = ac.createDynamicsCompressor();
+          master = ac.createGain();
+          master.gain.value = snd.vol * 0.6;
+          master.connect(comp);
+          comp.connect(ac.destination);
+          ac.onstatechange = hint;
+        }
+        if (ac.state === "suspended" && ac.resume) ac.resume().catch(() => {});
+        hint();
+        return ac;
+      }
+      function hint() {
+        blocked = !!((snd.on || drone.on) && ac && ac.state !== "running");
+        showTip();
+      }
+      function voiceOn(src, midi, vel) {
+        if (!snd.on) return;
+        const c = initAudio();
+        if (!c) return;
+        voiceOff(src, true);
+        const w = WAVES[snd.wave],
+          t = c.currentTime,
+          f = 440 * Math.pow(2, (midi - 69) / 12),
+          gn = c.createGain(),
+          lp = c.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = Math.min(w.lp, f * 8 + 400);
+        const peak = 0.4 * (0.3 + 0.7 * vel),
+          sum = w.o.reduce((a, x) => a + x[2], 0);
+        gn.gain.setValueAtTime(0, t);
+        gn.gain.linearRampToValueAtTime(peak, t + w.a);
+        gn.gain.exponentialRampToValueAtTime(
+          Math.max(peak * w.s, 0.0001),
+          t + w.a + w.d,
+        );
+        lp.connect(gn);
+        gn.connect(master);
+        const oscs = w.o.map(([type, m, lv]) => {
+          const o = c.createOscillator(),
+            og = c.createGain();
+          o.type = type;
+          o.frequency.value = f * m;
+          og.gain.value = lv / sum;
+          o.connect(og);
+          og.connect(lp);
+          o.start(t);
+          return o;
+        });
+        voices.set(src, { g: gn, oscs, r: w.r });
+      }
+      function voiceOff(src, quick) {
+        const v = voices.get(src);
+        if (!v || !ac) return;
+        voices.delete(src);
+        const t = ac.currentTime,
+          r = quick ? 0.03 : v.r;
+        v.g.gain.cancelScheduledValues(t);
+        v.g.gain.setValueAtTime(Math.max(v.g.gain.value, 0.0001), t);
+        v.g.gain.exponentialRampToValueAtTime(0.0001, t + r);
+        v.oscs.forEach((o) => {
+          try {
+            o.stop(t + r + 0.05);
+          } catch (e) {}
+        });
+        setTimeout(
+          () => {
+            try {
+              v.g.disconnect();
+            } catch (e) {}
+          },
+          (r + 0.2) * 1000,
+        );
+      }
+      // drone: sustained tonic, independent of the key sound
+      const drone = { on: false, v: null };
+      function droneStart() {
+        if (!drone.on) return;
+        const c = initAudio();
+        if (!c) return;
+        droneStop(0.25);
+        const t = c.currentTime,
+          f = 440 * Math.pow(2, (36 + tonic - 69) / 12),
+          gn = c.createGain(),
+          lp = c.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 1000;
+        gn.gain.setValueAtTime(0.0001, t);
+        gn.gain.linearRampToValueAtTime(0.24, t + 0.4);
+        lp.connect(gn);
+        gn.connect(master);
+        const oscs = [
+          ["triangle", 1, 1],
+          ["sine", 2, 0.45],
+          ["sine", 3, 0.15],
+        ].map(([type, m, lv]) => {
+          const o = c.createOscillator(),
+            og = c.createGain();
+          o.type = type;
+          o.frequency.value = f * m;
+          og.gain.value = lv / 1.6;
+          o.connect(og);
+          og.connect(lp);
+          o.start(t);
+          return o;
+        });
+        drone.v = { g: gn, oscs };
+      }
+      function droneStop(r) {
+        const v = drone.v;
+        if (!v || !ac) return;
+        drone.v = null;
+        r = r || 0.5;
+        const t = ac.currentTime;
+        v.g.gain.cancelScheduledValues(t);
+        v.g.gain.setValueAtTime(Math.max(v.g.gain.value, 0.0001), t);
+        v.g.linearRampToValueAtTime(0.0001, t + r);
+        v.oscs.forEach((o) => {
+          try {
+            o.stop(t + r + 0.05);
+          } catch (e) {}
+        });
+        setTimeout(
+          () => {
+            try {
+              v.g.disconnect();
+            } catch (e) {}
+          },
+          (r + 0.2) * 1000,
+        );
+      }
+      function setDrone(on) {
+        drone.on = on;
+        $("drone").setAttribute("aria-checked", on);
+        if (on) droneStart();
+        else droneStop();
+        hint();
+      }
+      $("drone").onclick = () => setDrone(!drone.on);
+      function releaseAllVoices() {
+        [...voices.keys()].forEach((k) => voiceOff(k));
+      }
+      ["pointerdown", "keydown", "touchstart"].forEach((ev) =>
+        addEventListener(
+          ev,
+          () => {
+            if (snd.on || drone.on) initAudio();
+          },
+          { passive: true },
+        ),
+      );
+      const waveDD = Dropdown($("waveDD"), {
+        value: "piano",
+        opts: [
+          ["piano", "Piano-like"],
+          ["soft", "Soft pad"],
+          ["organ", "Organ"],
+          ["synth", "Synth"],
+          ["none", "None"],
+        ].map(([v, l]) => ({ v, l })),
+        onChange: (v) => {
+          snd.on = v !== "none";
+          if (snd.on) snd.wave = v;
+          else releaseAllVoices();
+          hint();
+        },
+      });
+      function setVol(v) {
+        snd.vol = v;
+        $("vol").style.setProperty("--v", v * 100 + "%");
+        if (master) master.gain.setTargetAtTime(v * 0.6, ac.currentTime, 0.03);
+      }
+      $("vol").oninput = (e) => setVol(+e.target.value);
+
+      // ---- MIDI ----
+      const stText = $("stext"),
+        sdot = $("sdot"),
+        help = $("help"),
+        conn = $("connect");
+      function setStatus(kind, msg, tip) {
+        sdot.className = kind;
+        stText.textContent = msg;
+        help.textContent = tip || "";
+        help.hidden = !tip;
+      }
+      function wire(acc) {
+        const ins = [...acc.inputs.values()];
+        ins.forEach((i) => {
+          i.onmidimessage = (m) => {
+            const [st, k, v] = m.data,
+              cmd = st & 0xf0,
+              ch = st & 0x0f,
+              pre = "m" + i.id + "-" + ch + "-";
+            if (cmd === 0x90 && v > 0) noteOn(k % 12, pre + k, k, v / 127);
+            else if (cmd === 0x80 || (cmd === 0x90 && v === 0))
+              noteOff(k % 12, pre + k);
+            else if (cmd === 0xb0 && (k === 123 || k === 120)) {
+              [...active].forEach((a) => {
+                if (a.startsWith(pre)) noteOff(+a.slice(pre.length) % 12, a);
+              });
+            }
+          };
+        });
+        if (ins.length) {
+          setStatus(
+            "ok",
+            "Connected: " + ins.map((i) => i.name || "MIDI device").join(", "),
+          );
+          conn.hidden = true;
+        } else {
+          setStatus(
+            "warn",
+            "No MIDI keyboard detected.",
+            "Plug in and switch on your keyboard, and close other apps that may be using it (a DAW, for example). It will connect automatically, or press Rescan.",
+          );
+          conn.textContent = "Rescan";
+          conn.hidden = false;
+        }
+      }
+      function precheck() {
+        if (!window.isSecureContext) {
+          setStatus(
+            "bad",
+            "MIDI needs a secure page.",
+            "Open this page over https:// – browsers block MIDI on plain http.",
+          );
+          conn.hidden = true;
+          return false;
+        }
+        if (!navigator.requestMIDIAccess) {
+          setStatus(
+            "warn",
+            "This browser does not support Web MIDI.",
+            "Use Chrome, Edge or Opera on desktop, Chrome on Android, or Firefox 108+. Safari and iPhone/iPad browsers do not support Web MIDI. You can still play with the on-screen keys, your computer keyboard, or by clicking the dots.",
+          );
+          conn.hidden = true;
+          return false;
+        }
+        return true;
+      }
+      async function connectMIDI() {
+        const embedded = window.top !== window;
+        if (!precheck()) return;
+        setStatus(
+          "wait",
+          "Waiting for MIDI permission…",
+          "Choose Allow when your browser asks. Firefox may ask you to install a small site-permission add-on.",
+        );
+        conn.hidden = true;
+        try {
+          const acc = await navigator.requestMIDIAccess({ sysex: false });
+          acc.onstatechange = () => wire(acc);
+          wire(acc);
+        } catch (err) {
+          const n = err && err.name;
+          if (n === "SecurityError" || n === "NotAllowedError")
+            setStatus(
+              "bad",
+              "MIDI permission was blocked.",
+              embedded
+                ? "This page is embedded, which can block MIDI. Open it in its own browser tab, then allow MIDI access."
+                : "Click the lock or tune icon in the address bar, set MIDI devices to Allow, then press Connect. (Chrome: Site settings → MIDI devices.)",
+            );
+          else if (n === "AbortError" || n === "InvalidStateError")
+            setStatus(
+              "warn",
+              "The browser could not open MIDI.",
+              "Close other apps or tabs using your keyboard, reconnect it, and try again.",
+            );
+          else
+            setStatus(
+              "bad",
+              "Could not start MIDI.",
+              "Something went wrong (" +
+                (n || "unknown error") +
+                "). Reload the page, or use the on-screen keys.",
+            );
+          conn.textContent = "Connect MIDI keyboard";
+          conn.hidden = false;
+        }
+      }
+      conn.onclick = connectMIDI;
+      if (precheck()) {
+        setStatus(
+          "warn",
+          "MIDI keyboard not connected",
+          "Click Connect MIDI keyboard to allow access.",
+        );
+        conn.textContent = "Connect MIDI keyboard";
+        conn.hidden = false;
+        try {
+          navigator.permissions
+            .query({ name: "midi" })
+            .then((p) => {
+              if (p.state === "granted") connectMIDI();
+            })
+            .catch(() => {});
+        } catch (e) {}
+      }
+
+      // ---- on-screen piano: two octaves + top C, follows the current octave ----
+      const pianoEl = $("piano");
+      let pkeys = [];
+      function buildPiano() {
+        pianoEl.innerHTML = "";
+        pkeys = [];
+        const W = [0, 2, 4, 5, 7, 9, 11],
+          B = [
+            [1, 0],
+            [3, 1],
+            [6, 3],
+            [8, 4],
+            [10, 5],
+          ],
+          w = 100 / 15,
+          bw = w * 0.62,
+          lo = base();
+        const mk = (cls, midi, left, wd) => {
+          const b = document.createElement("button");
+          b.className = cls;
+          b.setAttribute(
+            "aria-label",
+            N[midi % 12] + (Math.floor(midi / 12) - 1),
+          );
+          b.style.left = left + "%";
+          b.style.width = wd + "%";
+          if (cls === "wk" && midi % 12 === 0) {
+            const sp = document.createElement("span");
+            sp.textContent = "C" + (Math.floor(midi / 12) - 1);
+            b.appendChild(sp);
+          }
+          pianoEl.appendChild(b);
+          const src = "p" + midi;
+          b.addEventListener("pointerdown", (e) => {
+            e.preventDefault();
+            b.setPointerCapture && b.setPointerCapture(e.pointerId);
+            noteOn(midi % 12, src, midi);
+          });
+          ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) =>
+            b.addEventListener(ev, () => noteOff(midi % 12, src)),
+          );
+          pkeys.push({ b, midi });
+        };
+        for (let o = 0; o < 2; o++)
+          W.forEach((s, i) => mk("wk", lo + o * 12 + s, (o * 7 + i) * w, w));
+        mk("wk", lo + 24, 14 * w, w);
+        for (let o = 0; o < 2; o++)
+          B.forEach(([s, i]) =>
+            mk("bk", lo + o * 12 + s, (o * 7 + i + 1) * w - bw / 2, bw),
+          );
+        $("octl").textContent = "C" + oct + " – C" + (oct + 2);
+        updatePiano();
+      }
+      function updatePiano() {
+        const lo = base(),
+          hi = lo + 24;
+        let below = false,
+          above = false;
+        const on = new Set();
+        srcMidi.forEach((m) => {
+          if (m < lo) below = true;
+          else if (m > hi) above = true;
+          else on.add(m);
+        });
+        pkeys.forEach(({ b, midi }) => {
+          if (on.has(midi)) {
+            b.classList.add("on");
+            b.style.setProperty(
+              "--c",
+              col(pos((((midi - tonic) % 12) + 12) % 12)),
+            );
+          } else {
+            b.classList.remove("on");
+            b.style.removeProperty("--c");
+          }
+        });
+        $("octd").classList.toggle("alert", below);
+        $("octu").classList.toggle("alert", above);
+      }
+      function setOct(n) {
+        oct = Math.max(0, Math.min(7, n));
+        buildPiano();
+      }
+      $("octd").onclick = () => setOct(oct - 1);
+      $("octu").onclick = () => setOct(oct + 1);
+
+      // computer keyboard: a w s e d f t g y h u j k o l p ; ' = C..F; Z / X change octave
+      const KM = "awsedftgyhujkolp;'";
+      const typing = (e) =>
+        e.target.tagName === "TEXTAREA" ||
+        (e.target.tagName === "INPUT" &&
+          !["checkbox", "range"].includes(e.target.type));
+      addEventListener("keydown", (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey || typing(e)) return;
+        const k = e.key.toLowerCase();
+        if (k === "z" || k === "x") {
+          if (!e.repeat) setOct(oct + (k === "x" ? 1 : -1));
+          return;
+        }
+        if (e.repeat) return;
+        const i = KM.indexOf(k);
+        if (i >= 0) noteOn(i % 12, "k" + i, base() + i);
+      });
+      addEventListener("keyup", (e) => {
+        const i = KM.indexOf(e.key.toLowerCase());
+        if (i >= 0) noteOff(i % 12, "k" + i);
+      });
+      addEventListener("blur", () => {
+        releaseAllVoices();
+        active.clear();
+        srcMidi.clear();
+        held.clear();
+        render();
+      });
+
+      initAudio();
+      setVol(0.6);
+      labelKeys();
+      buildPiano();
+      setTonic(0);
+      showTip();
+    </script>
+  </body>
 </html>
