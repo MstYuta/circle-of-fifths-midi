@@ -476,7 +476,8 @@
         gap: 14px;
         font-size: 17px;
       }
-      #vol {
+      #vol,
+      #tspeed {
         -webkit-appearance: none;
         appearance: none;
         width: clamp(110px, 16vw, 210px);
@@ -489,7 +490,8 @@
             calc(var(--v, 60%)) 100% no-repeat,
           rgba(255, 255, 255, 0.2);
       }
-      #vol::-webkit-slider-thumb {
+      #vol::-webkit-slider-thumb,
+      #tspeed::-webkit-slider-thumb {
         -webkit-appearance: none;
         width: 26px;
         height: 26px;
@@ -497,7 +499,8 @@
         background: radial-gradient(circle at 35% 30%, #fff, var(--acc));
         box-shadow: 0 2px 12px var(--acc);
       }
-      #vol::-moz-range-thumb {
+      #vol::-moz-range-thumb,
+      #tspeed::-moz-range-thumb {
         width: 26px;
         height: 26px;
         border: 0;
@@ -1028,11 +1031,22 @@
             id="drone"
             role="switch"
             aria-checked="false"
-            data-tip="Drone: hold the key's root note under your playing. Click to turn on or off."
+            data-tip="Tanpura: a looping Pa-Sa-Sa-Sa drone tuned to the key's root. Click to turn on or off."
           >
-            <span class="dd"></span>Drone
+            <span class="dd"></span>Tanpura
           </button>
-          <label class="vol" data-tip="Master volume for keys and drone."
+          <label class="vol" data-tip="Tanpura speed: how quickly the four strings are plucked."
+            ><span>Speed</span
+            ><input
+              type="range"
+              id="tspeed"
+              min="0.5"
+              max="2"
+              step="0.05"
+              value="1"
+              aria-label="Tanpura speed"
+          /></label>
+          <label class="vol" data-tip="Master volume for keys and tanpura."
             ><span>Master volume</span
             ><input
               type="range"
@@ -2135,50 +2149,135 @@
         );
       }
 
-      // drone: sustained tonic, independent of the key sound
+      // Tanpura: four strings (Pa, Sa, Sa, low Sa) plucked in a repeating cycle.
+      // Each pluck is a harmonic-rich tone whose upper partials swell after the
+      // attack; a sweeping filter peak imitates the bridge buzz ("jivari").
       const drone = { on: false, v: null };
+
+      // [pitch ratio to the C2-B2 root, seconds until the next pluck, level]
+      const TANPURA_STRINGS = [
+        [1.5, 0.95, 0.9], // Pa (lower octave)
+        [2, 0.95, 0.85], // Sa
+        [2, 1.15, 0.85], // Sa
+        [1, 1.05, 1], // Sa (low)
+      ];
+      const tanpura = { speed: 1 }; // pluck-rate multiplier (0.5x - 2x)
+      let tanpuraWave = null;
+
+      function setTanpuraSpeed(x) {
+        tanpura.speed = x;
+        $("tspeed").style.setProperty("--v", ((x - 0.5) / 1.5) * 100 + "%");
+      }
+      $("tspeed").oninput = (e) => setTanpuraSpeed(+e.target.value);
+      setTanpuraSpeed(1);
+
+      // f = this string's pitch, root = the key's root. All filter sweeps are keyed
+      // to the root, not to f, so every string shares one spectral envelope and
+      // the four notes read as a single instrument.
+      function tanpuraPluck(v, f, root, t, level) {
+        const c = ac;
+        const nyq = c.sampleRate * 0.45;
+        const hz = (x) => Math.min(x, nyq);
+        if (!tanpuraWave) {
+          const N = 40;
+          const im = new Float32Array(N + 1);
+          for (let n = 1; n <= N; n++) im[n] = Math.pow(n, -0.9);
+          tanpuraWave = c.createPeriodicWave(new Float32Array(N + 1), im);
+        }
+
+        const g = c.createGain();
+        const lp = c.createBiquadFilter();
+        const pk = c.createBiquadFilter();
+
+        // Brightness blooms over ~1s after the pluck, then slowly darkens
+        lp.type = "lowpass";
+        lp.Q.value = 0.5;
+        lp.frequency.setValueAtTime(hz(root * 5), t);
+        lp.frequency.exponentialRampToValueAtTime(hz(root * 24), t + 1.2);
+        lp.frequency.exponentialRampToValueAtTime(hz(root * 10), t + 7);
+
+        // Moving resonant peak = the buzzing jivari shimmer (same sweep for every string)
+        pk.type = "peaking";
+        pk.Q.value = 3;
+        pk.gain.value = 7;
+        pk.frequency.setValueAtTime(hz(root * 8), t);
+        pk.frequency.exponentialRampToValueAtTime(hz(root * 20), t + 2.4);
+
+        // Soft attack, long decay so neighbouring plucks overlap smoothly
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(level * (0.95 + Math.random() * 0.1), t + 0.015);
+        g.gain.setTargetAtTime(0.0001, t + 0.015, 2.2);
+
+        lp.connect(pk);
+        pk.connect(g);
+        g.connect(v.bus);
+
+        // Fixed, tiny detune pair: slow, even beating that is the same on every string
+        [-1.5, 1.5].forEach((cents) => {
+          const o = c.createOscillator();
+          o.setPeriodicWave(tanpuraWave);
+          o.frequency.setValueAtTime(f, t);
+          o.detune.value = cents;
+          o.connect(lp);
+          o.start(t);
+          o.stop(t + 12);
+          v.oscs.add(o);
+          o.onended = () => v.oscs.delete(o);
+        });
+      }
 
       function createDrone() {
         const c = ac;
         if (!c || c.state !== "running" || !master || !drone.on) return;
 
-        droneStop(0.05);
+        droneStop(0.35); // old key fades out while the new one starts
 
-        const t = c.currentTime;
-        const f = 440 * Math.pow(2, (36 + tonic - 69) / 12);
-        const gn = c.createGain();
-        const lp = c.createBiquadFilter();
+        const root = 440 * Math.pow(2, (36 + tonic - 69) / 12);
 
-        lp.type = "lowpass";
-        lp.frequency.setValueAtTime(1000, t);
-        lp.Q.value = 0.4;
+        // Shared "gourd" room: every string feeds the same short, dark echo, which
+        // glues the plucks together and carries each into the next
+        const bus = c.createGain();
+        const dly = c.createDelay(1);
+        const fb = c.createGain();
+        const wlp = c.createBiquadFilter();
+        const wet = c.createGain();
+        dly.delayTime.value = 0.137;
+        fb.gain.value = 0.4;
+        wlp.type = "lowpass";
+        wlp.frequency.value = 2800;
+        wet.gain.value = 0.4;
+        bus.connect(master);
+        bus.connect(dly);
+        dly.connect(fb);
+        fb.connect(dly);
+        dly.connect(wlp);
+        wlp.connect(wet);
+        wet.connect(master);
 
-        gn.gain.setValueAtTime(0.0001, t);
-        gn.gain.linearRampToValueAtTime(0.24, t + 0.4);
+        const v = {
+          bus,
+          nodes: [bus, dly, fb, wlp, wet],
+          oscs: new Set(),
+          idx: 0,
+          next: c.currentTime + 0.02,
+          timer: 0,
+        };
+        drone.v = v;
 
-        lp.connect(gn);
-        gn.connect(master);
-
-        const oscs = [
-          ["triangle", 1, 1],
-          ["sine", 2, 0.45],
-          ["sine", 3, 0.15],
-        ].map(([type, mult, level]) => {
-          const o = c.createOscillator();
-          const og = c.createGain();
-
-          o.type = type;
-          o.frequency.setValueAtTime(f * mult, t);
-          og.gain.value = level / 1.6;
-
-          o.connect(og);
-          og.connect(lp);
-          o.start(t);
-
-          return o;
-        });
-
-        drone.v = { g: gn, oscs };
+        // Look-ahead scheduler: queues plucks slightly ahead of the audio clock
+        const tick = () => {
+          if (drone.v !== v) return;
+          const now = c.currentTime;
+          if (v.next < now - 0.5) v.next = now + 0.02; // throttled tab: skip missed plucks
+          while (v.next < now + 0.6) {
+            const [ratio, gap, lvl] = TANPURA_STRINGS[v.idx];
+            tanpuraPluck(v, root * ratio, root, Math.max(v.next, now), 0.06 * lvl);
+            v.next += gap / tanpura.speed;
+            v.idx = (v.idx + 1) % TANPURA_STRINGS.length;
+          }
+        };
+        v.timer = setInterval(tick, 100);
+        tick();
       }
 
       function droneStart() {
@@ -2195,11 +2294,12 @@
         if (!v || !ac) return;
 
         drone.v = null;
+        clearInterval(v.timer);
 
         const t = ac.currentTime;
-        v.g.gain.cancelScheduledValues(t);
-        v.g.gain.setValueAtTime(Math.max(v.g.gain.value, 0.0001), t);
-        v.g.gain.linearRampToValueAtTime(0.0001, t + r);
+        v.bus.gain.cancelScheduledValues(t);
+        v.bus.gain.setValueAtTime(Math.max(v.bus.gain.value, 0.0001), t);
+        v.bus.gain.linearRampToValueAtTime(0.0001, t + r);
 
         v.oscs.forEach((o) => {
           try {
@@ -2210,7 +2310,7 @@
         setTimeout(
           () => {
             try {
-              v.g.disconnect();
+              v.nodes.forEach((n) => n.disconnect());
             } catch (e) {}
           },
           (r + 0.2) * 1000,
