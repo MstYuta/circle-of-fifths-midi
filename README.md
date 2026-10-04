@@ -35,7 +35,9 @@ Instead of simply showing note names, the visualizer shows the notes as **scale 
 
 For example, once a tonic is selected, the circle can show degrees such as:
 
-`1 · ♭2 · 2 · ♭3 · 3 · 4 · ♯4 · 5 · ♭6 · 6 · ♭7 · 7`
+`I · ♭II · II · ♭III · III · IV · ♭V · V · ♭VI · VI · ♭VII · VII`
+
+In minor mode the labels follow the minor scale, so you see `III`, `VI` and `VII` instead of `♭III`, `♭VI` and `♭VII`.
 
 The scale tones are visually distinguished from the non-scale tones.
 
@@ -43,37 +45,45 @@ The scale tones are visually distinguished from the non-scale tones.
 
 You don't need a MIDI keyboard just to hear the notes.
 
-The app includes a Web Audio synthesizer with four sound options:
+The app includes a Web Audio synthesizer with four instrument sounds:
 
 - Piano-like
 - Soft pad
 - Organ
 - Synth
 
-You can also control the main volume and turn sound on or off.
+Choose **None** to mute the keys. The **Master volume** slider controls the keys and the tanpura together.
 
-### 🎶 Tonic drone
+### 🪕 Tanpura drone
 
-The **Drone** feature plays a sustained tonic note while you practice.
+The **Tanpura** button plays a looping, plucked-string drone tuned to the current tonic while you practice.
 
-This is useful for ear training because you can hear the relationship between the notes you play and the tonal centre.
+This is useful for ear training because you hear every note you play against a constant tonal centre.
+
+How it sounds:
+
+- Four strings are plucked in a repeating cycle: **Pa**, **Sa**, **Sa**, then the **low Sa**.
+- Pa is a perfect fifth above the low Sa; the two Sa strings sit an octave above it.
+- Each pluck starts soft and gradually brightens, with a shimmering buzz similar to the *jivari* bridge of a real tanpura.
+- All strings share one tone colour and a short room echo, so they blend into a single instrument.
 
 You can:
 
-- Turn the tonic drone on or off
-- Adjust its volume
-- Change the tonic and have the drone follow it
+- Turn the tanpura on or off
+- Change how fast the strings are plucked with the **Speed** slider (0.5× to 2×, default 1×, about 4 seconds per full cycle)
+- Change the tonic and have the tanpura follow it (the old key fades out as the new one starts)
 - Use it while playing from MIDI, the computer keyboard, the piano, or the circle
+- Set its loudness with the **Master volume** slider (shared with the keys)
 
-The drone is **off by default**.
+The tanpura is **off by default**.
 
-### 🎯 Set the tonic from the next note
+### 🎯 Set the key by ear
 
 Don't want to manually select the tonic?
 
 Click:
 
-**Set tonic from next note**
+**Set key by ear**
 
 Then play a note. That note becomes the tonic automatically.
 
@@ -86,8 +96,21 @@ When a note is played:
 - Its scale-degree label becomes highlighted
 - The corresponding note on the on-screen piano lights up
 - Multiple held notes are connected to form a shape
+- The centre of the circle shows the Roman numeral of the chord you hold
 
 This makes intervals and chord shapes easier to see.
+
+### 🎼 Chord detection and history
+
+When you hold three or more notes that form a triad, the centre of the circle shows its Roman numeral relative to the tonic:
+
+- Uppercase for major (`I`, `V`), lowercase for minor (`vi`, `ii`)
+- `°` for diminished and `+` for augmented
+- `sus2` and `sus4` for suspended chords
+
+Each chord is also added to a scrolling **chord history**, grouped into sections by key and mode (for example "C Major"). Changing the key or mode starts a new section.
+
+Turn on the **Note names** button to see the note names on the circle and under the chord numeral.
 
 ---
 
@@ -98,15 +121,17 @@ This makes intervals and chord shapes easier to see.
 - **Scale-degree visualization** – view notes relative to the selected tonic.
 - **Circle-of-fifths layout** – notes are arranged by fifths rather than chromatic order.
 - **Automatic note spelling** – note names adapt to the selected key and mode.
-- **Tonic-from-next-note mode** – use the next played note as the tonic.
-- **Tonic drone** – sustain the tonic for ear training.
+- **Set key by ear** – use the next played note as the tonic.
+- **Tanpura drone** – a looping Pa–Sa–Sa–Sa tanpura on the tonic, with a speed control, for ear training.
 - **Web MIDI support** – connect compatible MIDI keyboards directly in the browser.
 - **Built-in synthesizer** – Piano-like, Soft pad, Organ, and Synth sounds.
 - **Two-octave on-screen piano** – play without external hardware.
 - **Computer keyboard input** – use your keyboard as a simple piano.
-- **Octave shifting** – use `Z` and `X` to move the playable range.
-- **Note-name display** – optionally show note names on the circle.
+- **Octave shifting** – use `Z` and `X` (or the on-screen arrows) to move the playable range.
+- **Note-name display** – show note names on the circle with the **Note names** button.
 - **Chord/interval visualization** – held notes form a shape on the circle.
+- **Chord detection** – held triads (major, minor, diminished, augmented, sus2, sus4) appear as Roman numerals in the centre.
+- **Chord history** – played chords are listed in order, grouped by key and mode.
 - **Responsive interface** – works across desktop and mobile-sized screens.
 - **No build system** – one HTML file contains the application.
 - **No backend** – everything runs locally in the browser.
@@ -221,16 +246,16 @@ The selected mode affects:
 - The available tonic names
 - Note spelling
 - Which degrees are treated as scale tones
-- The visual emphasis of the circle
-- The tonic drone prompt
+- Roman-numeral labels (`III`, `VI`, `VII` in minor)
+- The visual emphasis and background colours of the circle
 
 ---
 
-## 🔊 Tonic drone
+## 🪕 Tanpura
 
-The drone is designed primarily as an **ear-training aid**.
+The tanpura is designed primarily as an **ear-training aid**.
 
-For example, if the tonic is `C`, enabling the drone gives you a sustained C while you play other notes.
+For example, if the tonic is `C`, the tanpura plucks `G`, `C`, `C` and a low `C` in a loop. This gives you a steady tonal centre while you play other notes.
 
 This allows you to hear relationships such as:
 
@@ -241,7 +266,7 @@ C → B     major 7th
 C → F     perfect 4th
 ```
 
-The drone automatically follows the selected tonic.
+The tanpura automatically follows the selected tonic. Use the **Speed** slider to make the plucking slower or faster.
 
 ---
 
@@ -332,11 +357,11 @@ The HTML file contains the application's:
 - MIDI handling
 - Web Audio synthesizer
 - Tonic and mode selection
-- Drone functionality
+- Tanpura drone (with speed control)
 - On-screen piano
 - Computer keyboard controls
 
-The only external resource requested by the page is the **Jost font from Google Fonts**. A system-font fallback is provided if it cannot be loaded.
+The only external resource requested by the page is the **Inter font from Google Fonts**. A system-font fallback is provided if it cannot be loaded.
 
 ---
 
@@ -360,7 +385,8 @@ The project can also be deployed using services such as Netlify, Vercel, or Clou
 
 ## 🛠️ Current limitations
 
-- The built-in sounds are synthesised rather than sampled instruments.
+- The built-in sounds, including the tanpura, are synthesised rather than sampled instruments.
+- The tanpura uses a fixed Pa–Sa–Sa–Sa tuning and has no volume control of its own; a speed change takes effect from the next pluck.
 - Sustain pedal input is not currently handled.
 - Web MIDI is unavailable in Safari and iOS/iPadOS browsers.
 - Some browsers keep audio muted until the user interacts with the page.
@@ -372,9 +398,10 @@ The project can also be deployed using services such as Netlify, Vercel, or Clou
 
 Some ideas for future development:
 
-- Chord-name detection
+- Richer chord detection (seventh chords, extensions, chord names)
 - Automatic key/mode detection
 - Sustain-pedal support
+- Alternative tanpura tunings (such as Ma) and an independent tanpura volume
 - Sampled piano and instrument sounds
 - Light/dark visual themes
 - More advanced ear-training exercises
